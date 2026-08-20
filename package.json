@@ -10,15 +10,18 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "data:bizkaibus": "node scripts/fetch-bizkaibus-stops.mjs"
+    "data:bizkaibus": "node scripts/fetch-bizkaibus-stops.mjs",
+    "data:bilbobus": "node scripts/fetch-bilbobus-gtfs.mjs"
   },
   "dependencies": {
     "@astrojs/svelte": "^9.0.1",
     "astro": "^7.2.4",
+    "gtfs-realtime-bindings": "^2.2.0",
     "svelte": "^5.56.9",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10"
+    "@astrojs/check": "^0.9.10",
+    "adm-zip": "^0.6.0"
   }
 }
