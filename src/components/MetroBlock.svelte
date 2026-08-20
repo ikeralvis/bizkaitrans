@@ -1,7 +1,11 @@
 <script lang="ts">
-  import { getStation, toArrivalEstimates } from "../lib/metro/api";
+  import { getStation } from "../lib/metro/api";
+  import { toArrivalEstimates } from "../lib/metro/normalize";
   import type { ArrivalEstimate } from "../lib/shared/types";
+  import { OPERATOR_LABEL } from "../lib/shared/operators";
   import stations from "../data/metro/stations.json";
+  import ArrivalsList from "./shared/ArrivalsList.svelte";
+  import Spinner from "./shared/Spinner.svelte";
 
   interface StationEntry {
     id: number;
@@ -47,8 +51,8 @@
   }
 </script>
 
-<section class="metro-block">
-  <h2>🚇 Metro Bilbao</h2>
+<section class="block">
+  <h2>🚇 {OPERATOR_LABEL.metro}</h2>
 
   <div class="search">
     <input
@@ -62,7 +66,7 @@
         {#each filtered as station (station.id)}
           <li>
             <button type="button" onclick={() => selectStation(station)}>
-              {station.name} <span class="lines">{station.lines.join(" / ")}</span>
+              {station.name} <span class="meta">{station.lines.join(" / ")}</span>
             </button>
           </li>
         {/each}
@@ -71,7 +75,7 @@
   </div>
 
   {#if loading}
-    <p class="status">Cargando tiempos...</p>
+    <p class="status"><Spinner /> Cargando tiempos...</p>
   {:else if error}
     <p class="status error">Error: {error}</p>
   {:else if selected}
@@ -80,29 +84,15 @@
         <h3>{selected.name}</h3>
         <button type="button" onclick={refresh}>↻ Actualizar</button>
       </div>
-      {#if arrivals.length === 0}
-        <p class="status">Sin trenes próximos.</p>
-      {:else}
-        <ul class="arrivals">
-          {#each arrivals as train}
-            <li>
-              <span class="line-badge">{train.lineId}</span>
-              <span class="headsign">{train.headsign}</span>
-              <span class="minutes">
-                {train.minutesLeft <= 0 ? "Ahora" : `${train.minutesLeft} min`}
-              </span>
-            </li>
-          {/each}
-        </ul>
-      {/if}
+      <ArrivalsList {arrivals} emptyMessage="Sin trenes próximos." />
     </div>
   {/if}
 </section>
 
 <style>
-  .metro-block {
+  .block {
     max-width: 480px;
-    margin: 0 auto;
+    margin: 0 auto 2rem;
     font-family: system-ui, sans-serif;
   }
   .search {
@@ -141,7 +131,7 @@
   .suggestions li button:hover {
     background: #f2f2f2;
   }
-  .lines {
+  .meta {
     color: #888;
     font-size: 0.85rem;
   }
@@ -152,32 +142,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  .arrivals {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0;
-  }
-  .arrivals li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-  }
-  .line-badge {
-    background: #e30613;
-    color: white;
-    font-weight: bold;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-  }
-  .headsign {
-    flex: 1;
-  }
-  .minutes {
-    font-weight: bold;
   }
   .status {
     color: #666;

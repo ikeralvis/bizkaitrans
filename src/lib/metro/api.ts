@@ -1,4 +1,3 @@
-import type { ArrivalEstimate } from "../shared/types";
 import type { MetroStation, MetroTrip } from "./types";
 
 const BASE = "https://api.metrobilbao.eus";
@@ -47,15 +46,4 @@ export async function getSchedule(
   );
   if (!res.ok) throw new Error(`Metro getSchedule failed: ${res.status}`);
   return res.json();
-}
-
-/** Flattens a station's two platform boards into the shared ArrivalEstimate shape. */
-export function toArrivalEstimates(station: MetroStation): ArrivalEstimate[] {
-  return station.platforms.Platforms.flat().map((train) => ({
-    operator: "metro" as const,
-    lineId: train.line,
-    headsign: train.Destination,
-    minutesLeft: train.Minutes,
-    scheduledTime: train.Time,
-  }));
 }
