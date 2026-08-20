@@ -33,7 +33,7 @@ function parseLine(line, delimiter) {
 export function parseCsv(text, delimiter = ",") {
   const lines = text.split(/\r?\n/).filter((l) => l.length > 0);
   if (lines.length === 0) return [];
-  const headers = parseLine(lines[0], delimiter);
+  const headers = parseLine(lines[0], delimiter).map((h) => h.trim());
   const rows = new Array(lines.length - 1);
   for (let i = 1; i < lines.length; i++) {
     const values = parseLine(lines[i], delimiter);
