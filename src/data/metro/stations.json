@@ -1,0 +1,351 @@
+[
+  {
+    "id": 1,
+    "name": "Abando",
+    "code": "ABA",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Abatxolo",
+    "code": "ABT",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Aiboa",
+    "code": "AIB",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Algorta",
+    "code": "ALG",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Ansio",
+    "code": "ANS",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Areeta",
+    "code": "ARE",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Ariz",
+    "code": "ARZ",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Astrabudua",
+    "code": "AST",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Bagatza",
+    "code": "BAG",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Barakaldo",
+    "code": "BAR",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Basarrate",
+    "code": "BAS",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Basauri",
+    "code": "BSR",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 13,
+    "name": "Berango",
+    "code": "BER",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 14,
+    "name": "Bidezabal",
+    "code": "BID",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 15,
+    "name": "Bolueta",
+    "code": "BOL",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 16,
+    "name": "Deustu",
+    "code": "DEU",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 28,
+    "name": "Eliptikoa",
+    "code": "MOY",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Erandio",
+    "code": "ERA",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Etxebarri",
+    "code": "ETX",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 19,
+    "name": "Gobela",
+    "code": "GOB",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 20,
+    "name": "Gurutzeta/Cruces",
+    "code": "GUR",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 21,
+    "name": "Ibarbengoa",
+    "code": "IBB",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 22,
+    "name": "Indautxu",
+    "code": "IND",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 23,
+    "name": "Kabiezes",
+    "code": "KAB",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 24,
+    "name": "Lamiako",
+    "code": "LAM",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 25,
+    "name": "Larrabasterra",
+    "code": "LAR",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 26,
+    "name": "Leioa",
+    "code": "LEI",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 27,
+    "name": "Lutxana",
+    "code": "LUT",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 29,
+    "name": "Neguri",
+    "code": "NEG",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 30,
+    "name": "Peñota",
+    "code": "PEN",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 31,
+    "name": "Plentzia",
+    "code": "PLE",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 32,
+    "name": "Portugalete",
+    "code": "POR",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 33,
+    "name": "San Ignazio",
+    "code": "SIN",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 34,
+    "name": "San Mamés",
+    "code": "SAM",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 35,
+    "name": "Santurtzi",
+    "code": "STZ",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 36,
+    "name": "Santutxu",
+    "code": "SAN",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 37,
+    "name": "Sarriko",
+    "code": "SAR",
+    "lines": [
+      "L1",
+      "L2"
+    ]
+  },
+  {
+    "id": 38,
+    "name": "Sestao",
+    "code": "SES",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 39,
+    "name": "Sopela",
+    "code": "SOP",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 40,
+    "name": "Urbinaga",
+    "code": "URB",
+    "lines": [
+      "L2"
+    ]
+  },
+  {
+    "id": 41,
+    "name": "Urduliz",
+    "code": "URD",
+    "lines": [
+      "L1"
+    ]
+  },
+  {
+    "id": 42,
+    "name": "Zazpikaleak/Casco Viejo",
+    "code": "CAV",
+    "lines": [
+      "L1",
+      "L2",
+      "L3"
+    ]
+  }
+]

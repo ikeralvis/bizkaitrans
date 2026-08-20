@@ -1,0 +1,31 @@
+---
+import MetroBlock from "../components/MetroBlock.svelte";
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Bizkaitrans</title>
+	</head>
+	<body>
+		<main>
+			<h1>Bizkaitrans</h1>
+			<MetroBlock client:load />
+		</main>
+	</body>
+</html>
+
+<style>
+	body {
+		font-family: system-ui, sans-serif;
+		background: #fafafa;
+		margin: 0;
+		padding: 2rem 1rem;
+	}
+	h1 {
+		text-align: center;
+	}
+</style>
