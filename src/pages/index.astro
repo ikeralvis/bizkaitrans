@@ -1,8 +1,6 @@
 ---
-import MetroBlock from "../components/MetroBlock.svelte";
-import BizkaibusBlock from "../components/BizkaibusBlock.svelte";
-import BilbobusBlock from "../components/BilbobusBlock.svelte";
-import RenfeBlock from "../components/RenfeBlock.svelte";
+import TransportTabs from "../components/TransportTabs.svelte";
+import "../styles/global.css";
 ---
 
 <html lang="es">
@@ -13,25 +11,10 @@ import RenfeBlock from "../components/RenfeBlock.svelte";
 		<meta name="generator" content={Astro.generator} />
 		<title>Bizkaitrans</title>
 	</head>
-	<body>
-		<main>
-			<h1>Bizkaitrans</h1>
-			<MetroBlock client:load />
-			<BizkaibusBlock client:idle />
-			<BilbobusBlock client:idle />
-			<RenfeBlock client:idle />
+	<body class="min-h-screen bg-background text-text">
+		<main class="px-4 py-6">
+			<h1 class="mb-4 text-center text-xl font-bold tracking-tight">Bizkaitrans</h1>
+			<TransportTabs client:load />
 		</main>
 	</body>
 </html>
-
-<style>
-	body {
-		font-family: system-ui, sans-serif;
-		background: #fafafa;
-		margin: 0;
-		padding: 2rem 1rem;
-	}
-	h1 {
-		text-align: center;
-	}
-</style>

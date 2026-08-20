@@ -2,10 +2,11 @@
   import { getBilbaoArrivals, filterByStop } from "../lib/renfe/api";
   import { toArrivalEstimates } from "../lib/renfe/normalize";
   import type { ArrivalEstimate } from "../lib/shared/types";
-  import { OPERATOR_LABEL } from "../lib/shared/operators";
   import stations from "../data/renfe/stations.json";
   import ArrivalsList from "./shared/ArrivalsList.svelte";
+  import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
+  import { RefreshCw } from "@lucide/svelte";
 
   interface RenfeStation {
     code: string;
@@ -24,20 +25,19 @@
   let error = $state<string | null>(null);
 
   let filtered = $derived(
-    query.trim().length === 0
+    selected || query.trim().length === 0
       ? []
       : allStations.filter((s) => s.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
   );
 
-  async function selectStation(station: RenfeStation) {
-    selected = station;
-    query = station.name;
-    filtered = [];
+  async function selectStation(entry: RenfeStation) {
+    selected = entry;
+    query = entry.name;
     loading = true;
     error = null;
     try {
       const all = await getBilbaoArrivals();
-      const updates = filterByStop(all, station.code);
+      const updates = filterByStop(all, entry.code);
       arrivals = toArrivalEstimates(updates)
         .filter((a) => a.minutesLeft >= -1)
         .sort((a, b) => a.minutesLeft - b.minutesLeft);
@@ -53,102 +53,41 @@
   }
 </script>
 
-<section class="block">
-  <h2>🚆 {OPERATOR_LABEL.renfe}</h2>
-
-  <div class="search">
+<section class="space-y-3">
+  <div class="relative">
     <input
       type="text"
       placeholder="Buscar estación (ej. Abando, Deusto...)"
+      class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-renfe/50"
       bind:value={query}
       oninput={() => (selected = null)}
     />
-    {#if filtered.length > 0}
-      <ul class="suggestions">
-        {#each filtered as station (station.code)}
-          <li>
-            <button type="button" onclick={() => selectStation(station)}>
-              {station.name} <span class="meta">{station.municipality}</span>
-            </button>
-          </li>
-        {/each}
-      </ul>
-    {/if}
+    <SearchDropdown items={filtered} getKey={(s) => s.code} onSelect={selectStation}>
+      {#snippet item(s: RenfeStation)}
+        <span class="truncate">{s.name}</span>
+        <span class="shrink-0 text-xs text-text-faint">{s.municipality}</span>
+      {/snippet}
+    </SearchDropdown>
   </div>
 
   {#if loading}
-    <p class="status"><Spinner /> Cargando tiempos...</p>
+    <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
   {:else if error}
-    <p class="status error">Error: {error}</p>
+    <p class="py-2 text-sm text-red-400">Error: {error}</p>
   {:else if selected}
-    <div class="board">
-      <div class="board-header">
-        <h3>{selected.name}</h3>
-        <button type="button" onclick={refresh}>↻ Actualizar</button>
+    <div class="rounded-2xl border border-border bg-surface p-4">
+      <div class="mb-2 flex items-center justify-between">
+        <h3 class="font-semibold">{selected.name}</h3>
+        <button
+          type="button"
+          class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+          onclick={refresh}
+          aria-label="Actualizar"
+        >
+          <RefreshCw size={16} />
+        </button>
       </div>
       <ArrivalsList {arrivals} emptyMessage="Sin trenes próximos." />
     </div>
   {/if}
 </section>
-
-<style>
-  .block {
-    max-width: 480px;
-    margin: 0 auto 2rem;
-    font-family: system-ui, sans-serif;
-  }
-  .search {
-    position: relative;
-  }
-  input {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-  }
-  .suggestions {
-    position: absolute;
-    z-index: 10;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width: 100%;
-    list-style: none;
-    margin: 4px 0 0;
-    padding: 0.25rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  .suggestions li button {
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-  }
-  .suggestions li button:hover {
-    background: #f2f2f2;
-  }
-  .meta {
-    color: #888;
-    font-size: 0.85rem;
-  }
-  .board {
-    margin-top: 1rem;
-  }
-  .board-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .status {
-    color: #666;
-  }
-  .status.error {
-    color: #c0392b;
-  }
-</style>

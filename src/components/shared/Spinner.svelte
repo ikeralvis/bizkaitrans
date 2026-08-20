@@ -1,19 +1,13 @@
-<span class="spinner" aria-label="Cargando"></span>
+<script lang="ts">
+  interface Props {
+    size?: number;
+  }
+  let { size = 16 }: Props = $props();
+</script>
 
-<style>
-  .spinner {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    border: 2px solid #ddd;
-    border-top-color: #666;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-  }
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>
+<span
+  class="inline-block animate-spin rounded-full border-2 border-text-faint/30 border-t-text-muted align-middle"
+  style:width="{size}px"
+  style:height="{size}px"
+  aria-label="Cargando"
+></span>

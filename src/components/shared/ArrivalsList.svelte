@@ -11,47 +11,22 @@
 </script>
 
 {#if arrivals.length === 0}
-  <p class="empty">{emptyMessage}</p>
+  <p class="py-3 text-sm text-text-faint">{emptyMessage}</p>
 {:else}
-  <ul class="arrivals">
+  <ul class="divide-y divide-border">
     {#each arrivals as train, i (train.lineId + train.headsign + train.minutesLeft + i)}
-      <li>
-        <span class="line-badge" style:background={OPERATOR_COLOR[train.operator]}>{train.lineId}</span>
-        <span class="headsign">{train.headsign}</span>
-        <span class="minutes">{train.minutesLeft <= 0 ? "Ahora" : `${train.minutesLeft} min`}</span>
+      <li class="flex items-center gap-3 py-2.5">
+        <span
+          class="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+          style:background={OPERATOR_COLOR[train.operator]}
+        >
+          {train.lineId}
+        </span>
+        <span class="flex-1 truncate text-sm text-text-muted">{train.headsign}</span>
+        <span class="shrink-0 text-sm font-semibold tabular-nums">
+          {train.minutesLeft <= 0 ? "Ahora" : `${train.minutesLeft} min`}
+        </span>
       </li>
     {/each}
   </ul>
 {/if}
-
-<style>
-  .arrivals {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0;
-  }
-  .arrivals li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-  }
-  .line-badge {
-    color: white;
-    font-weight: bold;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-  .headsign {
-    flex: 1;
-  }
-  .minutes {
-    font-weight: bold;
-  }
-  .empty {
-    color: #666;
-  }
-</style>

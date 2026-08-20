@@ -1,10 +1,10 @@
 import type { Operator } from "./types";
 
 export const OPERATOR_COLOR: Record<Operator, string> = {
-  metro: "#e30613",
-  bilbobus: "#f39200",
-  bizkaibus: "#00843d",
-  renfe: "#004990",
+  metro: "var(--color-metro)",
+  bilbobus: "var(--color-bilbobus)",
+  bizkaibus: "var(--color-bizkaibus)",
+  renfe: "var(--color-renfe)",
 };
 
 export const OPERATOR_LABEL: Record<Operator, string> = {
