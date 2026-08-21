@@ -21,7 +21,8 @@
     <img
       src={illustration}
       alt=""
-      class="pointer-events-none absolute top-1/2 -right-6 h-[135%] w-auto -translate-y-1/2 object-contain opacity-95 drop-shadow-lg"
+      class="pointer-events-none absolute top-1/2 right-0 h-full w-2/3 -translate-y-1/2 object-cover object-right opacity-70"
+      style="mask-image: linear-gradient(to right, transparent, black 45%); -webkit-mask-image: linear-gradient(to right, transparent, black 45%);"
     />
   {:else if illustration}
     <img
