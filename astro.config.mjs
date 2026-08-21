@@ -5,17 +5,13 @@ import svelte from '@astrojs/svelte';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import cloudflare from '@astrojs/cloudflare';
-
 // https://astro.build/config
+// Plain static output, no server adapter - deployable to Cloudflare Pages
+// (or any static host) exactly like the rest of the site's Cloudflare
+// projects. The two feeds with no CORS headers (Bilbobus GTFS-RT, Renfe
+// trip_updates) are proxied by a separate small Cloudflare Worker in
+// worker/ instead of an Astro API route - see worker/README.md.
 export default defineConfig({
-  // Everything stays statically prerendered except the routes that opt out
-  // with `export const prerender = false` (src/pages/api/**) - those need a
-  // real server at request time to proxy CORS-blocked upstream feeds, which
-  // is what this adapter provides once deployed to Cloudflare Pages.
-  output: 'static',
-  adapter: cloudflare(),
-
   integrations: [svelte()],
 
   vite: {

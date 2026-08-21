@@ -9,7 +9,6 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy",
     "astro": "astro",
     "data:bizkaibus": "node scripts/fetch-bizkaibus-stops.mjs",
     "data:bizkaibus-lines": "node scripts/fetch-bizkaibus-lines.mjs",
@@ -19,12 +18,10 @@
     "data:all": "npm run data:bizkaibus && npm run data:bizkaibus-lines && npm run data:bilbobus && npm run data:renfe && npm run data:metro-lines"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.2.3",
     "@astrojs/svelte": "^9.0.1",
     "@lucide/svelte": "^1.33.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.2.4",
-    "gtfs-realtime-bindings": "^2.2.0",
     "svelte": "^5.56.9",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"

@@ -1,8 +1,9 @@
 import type { RenfeStopUpdate } from "./types";
+import { PROXY_BASE } from "../shared/proxyBase";
 
-/** Talks to our own proxy (see realtime.server.ts) - gtfsrt.renfe.com has no CORS. */
+/** Talks to the standalone worker proxy (see worker/) - gtfsrt.renfe.com has no CORS. */
 export async function getBilbaoArrivals(): Promise<RenfeStopUpdate[]> {
-  const res = await fetch("/api/renfe/arrivals");
+  const res = await fetch(`${PROXY_BASE}/renfe/arrivals`);
   if (!res.ok) throw new Error(`Renfe arrivals proxy failed: ${res.status}`);
   return res.json();
 }
