@@ -22,6 +22,10 @@ export function looseJsonToJson(text: string): string {
       out += '\\"';
       continue;
     }
+    if (inString && ch === "\\") {
+      out += "\\\\";
+      continue;
+    }
     out += ch;
   }
   return out;

@@ -8,7 +8,11 @@
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
-  import { RefreshCw } from "@lucide/svelte";
+  import FavoriteButton from "./shared/FavoriteButton.svelte";
+  import LinesBrowser from "./bizkaibus/LinesBrowser.svelte";
+  import { RefreshCw, Route } from "@lucide/svelte";
+
+  let showLines = $state(false);
 
   let query = $state("");
   let suggestions = $state<BizkaibusStop[]>([]);
@@ -79,7 +83,18 @@
     {/if}
   </div>
 
-  {#if loading}
+  <button
+    type="button"
+    class="flex items-center gap-1.5 text-xs font-medium text-text-faint hover:text-text"
+    onclick={() => (showLines = !showLines)}
+  >
+    <Route size={13} />
+    {showLines ? "Ver parada" : "Ver líneas"}
+  </button>
+
+  {#if showLines}
+    <LinesBrowser />
+  {:else if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
   {:else if error}
     <p class="py-2 text-sm text-red-400">Error: {error}</p>
@@ -87,16 +102,32 @@
     <div class="rounded-2xl border border-border bg-surface p-4">
       <div class="mb-2 flex items-center justify-between">
         <h3 class="font-semibold">{selected.name}</h3>
-        <button
-          type="button"
-          class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
-          onclick={refresh}
-          aria-label="Actualizar"
-        >
-          <RefreshCw size={16} />
-        </button>
+        <div class="flex items-center gap-1">
+          <FavoriteButton stop={{ operator: "bizkaibus", code: selected.code, name: selected.name, meta: selected.municipality }} />
+          <button
+            type="button"
+            class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+            onclick={refresh}
+            aria-label="Actualizar"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
       </div>
       <ArrivalsList {arrivals} emptyMessage="Sin autobuses próximos." />
+
+      {#if selected.lines && selected.lines.length > 0}
+        <div class="mt-3 border-t border-border pt-3">
+          <p class="mb-1.5 text-xs font-medium text-text-faint uppercase">Correspondencias</p>
+          <div class="flex flex-wrap gap-1">
+            {#each selected.lines as lineCode (lineCode)}
+              <span class="rounded-full bg-bizkaibus/10 px-2 py-0.5 text-xs font-medium text-bizkaibus">
+                {lineCode}
+              </span>
+            {/each}
+          </div>
+        </div>
+      {/if}
     </div>
   {/if}
 </section>

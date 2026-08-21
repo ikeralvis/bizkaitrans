@@ -18,6 +18,10 @@ export function looseJsonToJson(text) {
       out += '\\"';
       continue;
     }
+    if (inString && ch === "\\") {
+      out += "\\\\";
+      continue;
+    }
     out += ch;
   }
   return out;

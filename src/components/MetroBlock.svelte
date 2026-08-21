@@ -7,7 +7,11 @@
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
-  import { RefreshCw, Accessibility, ArrowUpFromLine } from "@lucide/svelte";
+  import FavoriteButton from "./shared/FavoriteButton.svelte";
+  import MetroFares from "./metro/MetroFares.svelte";
+  import { RefreshCw, Accessibility, ArrowUpFromLine, CreditCard } from "@lucide/svelte";
+
+  let showFares = $state(false);
 
   interface StationEntry {
     id: number;
@@ -68,7 +72,18 @@
     </SearchDropdown>
   </div>
 
-  {#if loading}
+  <button
+    type="button"
+    class="flex items-center gap-1.5 text-xs font-medium text-text-faint hover:text-text"
+    onclick={() => (showFares = !showFares)}
+  >
+    <CreditCard size={13} />
+    {showFares ? "Ver parada" : "Ver tarifas"}
+  </button>
+
+  {#if showFares}
+    <MetroFares />
+  {:else if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
   {:else if error}
     <p class="py-2 text-sm text-red-400">Error: {error}</p>
@@ -80,14 +95,17 @@
       <div class="p-4">
         <div class="mb-2 flex items-center justify-between">
           <h3 class="font-semibold">{station.name}</h3>
-          <button
-            type="button"
-            class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
-            onclick={refresh}
-            aria-label="Actualizar"
-          >
-            <RefreshCw size={16} />
-          </button>
+          <div class="flex items-center gap-1">
+            <FavoriteButton stop={{ operator: "metro", code: station.code, name: station.name, meta: station.line.join(" / ") }} />
+            <button
+              type="button"
+              class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+              onclick={refresh}
+              aria-label="Actualizar"
+            >
+              <RefreshCw size={16} />
+            </button>
+          </div>
         </div>
 
         <ArrivalsList {arrivals} emptyMessage="Sin trenes próximos." />

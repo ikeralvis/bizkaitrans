@@ -1,5 +1,5 @@
 ---
-import TransportTabs from "../components/TransportTabs.svelte";
+import AppShell from "../components/AppShell.svelte";
 import "../styles/global.css";
 ---
 
@@ -7,14 +7,14 @@ import "../styles/global.css";
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Bizkaitrans</title>
 	</head>
 	<body class="min-h-screen bg-background text-text">
-		<main class="px-4 py-6">
-			<h1 class="mb-4 text-center text-xl font-bold tracking-tight">Bizkaitrans</h1>
-			<TransportTabs client:load />
-		</main>
+		<header class="px-4 py-4 text-center">
+			<h1 class="text-lg font-bold tracking-tight">Bizkaitrans</h1>
+		</header>
+		<AppShell client:load />
 	</body>
 </html>

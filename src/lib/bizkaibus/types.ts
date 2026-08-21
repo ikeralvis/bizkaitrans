@@ -19,4 +19,24 @@ export interface BizkaibusStop {
   municipality: string;
   lat: number;
   lon: number;
+  /** Other line codes calling at this stop, derived by scripts/fetch-bizkaibus-lines.mjs */
+  lines?: string[];
+}
+
+export interface BizkaibusLineSummary {
+  code: string;
+  routeNumber: string;
+  name: string;
+}
+
+export interface BizkaibusLineStop {
+  code: string;
+  name: string;
+}
+
+export interface BizkaibusLineDetail {
+  code: string;
+  name: string;
+  /** "I" (ida) | "V" (vuelta) -> ordered stops */
+  directions: Record<string, BizkaibusLineStop[]>;
 }

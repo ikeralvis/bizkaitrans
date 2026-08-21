@@ -6,6 +6,7 @@
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
+  import FavoriteButton from "./shared/FavoriteButton.svelte";
   import { RefreshCw } from "@lucide/svelte";
 
   interface RenfeStation {
@@ -78,14 +79,17 @@
     <div class="rounded-2xl border border-border bg-surface p-4">
       <div class="mb-2 flex items-center justify-between">
         <h3 class="font-semibold">{selected.name}</h3>
-        <button
-          type="button"
-          class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
-          onclick={refresh}
-          aria-label="Actualizar"
-        >
-          <RefreshCw size={16} />
-        </button>
+        <div class="flex items-center gap-1">
+          <FavoriteButton stop={{ operator: "renfe", code: selected.code, name: selected.name, meta: selected.municipality }} />
+          <button
+            type="button"
+            class="rounded-full p-1.5 text-text-faint hover:bg-surface-hover hover:text-text"
+            onclick={refresh}
+            aria-label="Actualizar"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
       </div>
       <ArrivalsList {arrivals} emptyMessage="Sin trenes próximos." />
     </div>

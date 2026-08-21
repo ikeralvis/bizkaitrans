@@ -11,8 +11,10 @@
     "preview": "astro preview",
     "astro": "astro",
     "data:bizkaibus": "node scripts/fetch-bizkaibus-stops.mjs",
+    "data:bizkaibus-lines": "node scripts/fetch-bizkaibus-lines.mjs",
     "data:bilbobus": "node scripts/fetch-bilbobus-gtfs.mjs",
-    "data:renfe": "node scripts/fetch-renfe-stations.mjs"
+    "data:renfe": "node scripts/fetch-renfe-stations.mjs",
+    "data:all": "npm run data:bizkaibus && npm run data:bizkaibus-lines && npm run data:bilbobus && npm run data:renfe"
   },
   "dependencies": {
     "@astrojs/svelte": "^9.0.1",

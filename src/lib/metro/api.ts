@@ -1,4 +1,4 @@
-import type { MetroStation, MetroTrip } from "./types";
+import type { MetroFaresResponse, MetroIncidentsResponse, MetroStation, MetroTrip } from "./types";
 
 const BASE = "https://api.metrobilbao.eus";
 
@@ -18,14 +18,14 @@ export async function getRealTimeTrip(origin: string, destination: string): Prom
   return res.json();
 }
 
-export async function getIncidents(lang: Lang = "es"): Promise<unknown> {
+export async function getIncidents(lang: Lang = "es"): Promise<MetroIncidentsResponse> {
   const path = lang === "eu" ? "eu/abisuak" : "es/avisos";
   const res = await fetch(`${BASE}/metro_page/${path}`);
   if (!res.ok) throw new Error(`Metro getIncidents failed: ${res.status}`);
   return res.json();
 }
 
-export async function getFares(lang: Lang = "es"): Promise<unknown> {
+export async function getFares(lang: Lang = "es"): Promise<MetroFaresResponse> {
   const path = lang === "eu" ? "eu/tarifa-guztiak" : "es/todas-las-tarifas";
   const res = await fetch(`${BASE}/metro_page/${path}`);
   if (!res.ok) throw new Error(`Metro getFares failed: ${res.status}`);
