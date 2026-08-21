@@ -6,16 +6,24 @@
     title: string;
     logo?: string;
     illustration?: string;
+    /** "brand" shows the illustration large, in its own colors, as a hero graphic. "faint" (default) is a small inverted-white watermark. */
+    illustrationVariant?: "faint" | "brand";
     icon?: Component;
     actions?: Snippet;
   }
-  let { color, title, logo, illustration, icon: Icon, actions }: Props = $props();
+  let { color, title, logo, illustration, illustrationVariant = "faint", icon: Icon, actions }: Props = $props();
 </script>
 
 <div class="relative mb-4 overflow-hidden rounded-3xl" style:background={color}>
   <div class="absolute inset-0 bg-gradient-to-br from-black/0 via-black/5 to-black/40"></div>
 
-  {#if illustration}
+  {#if illustration && illustrationVariant === "brand"}
+    <img
+      src={illustration}
+      alt=""
+      class="pointer-events-none absolute top-1/2 -right-6 h-[135%] w-auto -translate-y-1/2 object-contain opacity-95 drop-shadow-lg"
+    />
+  {:else if illustration}
     <img
       src={illustration}
       alt=""

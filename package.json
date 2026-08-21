@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy": "astro build && wrangler deploy",
     "astro": "astro",
     "data:bizkaibus": "node scripts/fetch-bizkaibus-stops.mjs",
     "data:bizkaibus-lines": "node scripts/fetch-bizkaibus-lines.mjs",

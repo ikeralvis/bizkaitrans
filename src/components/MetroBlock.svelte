@@ -22,7 +22,7 @@
     Bell,
     X,
     ArrowRightLeft,
-    TrainFront,
+    TramFront,
     Leaf,
     ChevronLeft,
     ChevronRight,
@@ -151,6 +151,7 @@
   title="Metro Bilbao"
   logo="https://www.metrobilbao.eus/img/mb-logo-white-text.png"
   illustration="https://www.metrobilbao.eus/img/tren-vector.svg"
+  illustrationVariant="brand"
 >
   {#snippet actions()}
     <button
@@ -287,13 +288,16 @@
       {:else}
         <ul class="divide-y divide-border">
           {#each trip.trains as train, i (i)}
-            <li class="flex items-center gap-3 py-2">
-              <TrainFront size={16} class="shrink-0 text-metro" />
-              <span class="flex-1 text-sm text-text-muted">
-                → {train.direction} · {train.wagons} vagones
+            <li class="flex items-center gap-3 py-3">
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-base font-medium text-text">→ {train.direction}</span>
+                <span class="mt-0.5 flex items-center gap-1 text-xs text-text-faint">
+                  <TramFront size={13} class="shrink-0" />
+                  {train.wagons} vagones
+                </span>
               </span>
-              <span class="shrink-0 text-sm font-semibold tabular-nums">
-                {train.estimated <= 0 ? "Ahora" : `${train.estimated} min`}
+              <span class="shrink-0 text-2xl font-bold tabular-nums">
+                {train.estimated <= 0 ? "Ahora" : `${train.estimated}′`}
               </span>
             </li>
           {/each}
