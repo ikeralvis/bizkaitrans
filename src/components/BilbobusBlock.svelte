@@ -28,12 +28,24 @@
   async function selectRoute(routeId: string) {
     selectedRouteId = routeId;
     direction = "0";
-    dateIndex = 0;
     expandedStopCode = null;
     routeLoading = true;
     routeDetail = await getRouteDetail(routeId);
     if (!routeDetail.directions[direction]) {
       direction = (Object.keys(routeDetail.directions)[0] as "0" | "1") ?? "0";
+    }
+    if (routeDetail.dates.length === 1 && routeDetail.dates[0].date === "APPROX") {
+      // Pipeline fell back to an approximate schedule (see fetch-bilbobus-gtfs.mjs) -
+      // there's only one "day" to pick.
+      dateIndex = 0;
+    } else {
+      // The dataset covers a rolling window generated at build time - if the
+      // page has been open across a day boundary (or data hasn't been
+      // refreshed), index 0 is no longer "today". Find the real match instead
+      // of assuming, falling back to the closest future date.
+      const today = todayStr();
+      const exactIdx = routeDetail.dates.findIndex((d) => d.date === today);
+      dateIndex = exactIdx >= 0 ? exactIdx : Math.max(0, routeDetail.dates.findIndex((d) => d.date > today));
     }
     routeLoading = false;
     refreshVehicles();
@@ -63,7 +75,10 @@
   }
 
   function upcomingTimes(times: string[], dateStr: string, limit = 3): string[] {
-    const isToday = dateStr === todayStr();
+    // In approximate-schedule mode there's no real "today" to compare against,
+    // but showing what's next from now is still more useful than always
+    // showing the start of the day.
+    const isToday = dateStr === todayStr() || dateStr === "APPROX";
     const from = isToday ? currentHms() : "00:00:00";
     const upcoming = times.filter((t) => t >= from);
     return (upcoming.length > 0 ? upcoming : times).slice(0, limit);
@@ -113,21 +128,28 @@
         {/each}
       </div>
 
-      <div class="mb-3 flex flex-wrap gap-1">
-        {#each routeDetail.dates as d, i (d.date)}
-          <button
-            type="button"
-            class="rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
-            class:bg-bilbobus={dateIndex === i}
-            class:text-black={dateIndex === i}
-            class:bg-surface-hover={dateIndex !== i}
-            class:text-text-muted={dateIndex !== i}
-            onclick={() => (dateIndex = i)}
-          >
-            {d.weekday} {d.date.slice(6, 8)}/{d.date.slice(4, 6)}
-          </button>
-        {/each}
-      </div>
+      {#if routeDetail.dates.length === 1 && routeDetail.dates[0].date === "APPROX"}
+        <p class="mb-3 rounded-xl bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+          Horario aproximado: la fuente de datos de Bilbobus no tiene esta semana bien sincronizado su calendario de
+          servicio, así que no podemos garantizar que sea el de hoy exacto.
+        </p>
+      {:else}
+        <div class="mb-3 flex flex-wrap gap-1">
+          {#each routeDetail.dates as d, i (d.date)}
+            <button
+              type="button"
+              class="rounded-full px-2.5 py-1 text-xs font-medium transition-colors"
+              class:bg-bilbobus={dateIndex === i}
+              class:text-black={dateIndex === i}
+              class:bg-surface-hover={dateIndex !== i}
+              class:text-text-muted={dateIndex !== i}
+              onclick={() => (dateIndex = i)}
+            >
+              {d.weekday} {d.date.slice(6, 8)}/{d.date.slice(4, 6)}
+            </button>
+          {/each}
+        </div>
+      {/if}
 
       <div class="mb-3 flex items-center gap-2 text-xs">
         {#if vehiclesLoading}

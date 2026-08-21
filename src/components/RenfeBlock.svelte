@@ -7,7 +7,8 @@
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
-  import { RefreshCw } from "@lucide/svelte";
+  import { favorites } from "../lib/shared/favorites.svelte";
+  import { RefreshCw, Star } from "@lucide/svelte";
 
   interface RenfeStation {
     code: string;
@@ -18,6 +19,7 @@
   }
 
   const allStations = stations as RenfeStation[];
+  let renfeFavorites = $derived(favorites.items.filter((f) => f.operator === "renfe"));
 
   let query = $state("");
   let selected = $state<RenfeStation | null>(null);
@@ -52,6 +54,13 @@
   function refresh() {
     if (selected) selectStation(selected);
   }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter" && filtered.length > 0) {
+      e.preventDefault();
+      selectStation(filtered[0]);
+    }
+  }
 </script>
 
 <section class="space-y-3">
@@ -62,6 +71,7 @@
       class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-renfe/50"
       bind:value={query}
       oninput={() => (selected = null)}
+      onkeydown={onKeydown}
     />
     <SearchDropdown items={filtered} getKey={(s) => s.code} onSelect={selectStation}>
       {#snippet item(s: RenfeStation)}
@@ -70,6 +80,21 @@
       {/snippet}
     </SearchDropdown>
   </div>
+
+  {#if !selected && renfeFavorites.length > 0}
+    <div class="flex flex-wrap gap-1.5">
+      {#each renfeFavorites as fav (fav.code)}
+        <button
+          type="button"
+          class="flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover"
+          onclick={() => selectStation({ code: fav.code, name: fav.name, municipality: fav.meta ?? "", lat: 0, lon: 0 })}
+        >
+          <Star size={11} class="text-amber-400" fill="currentColor" />
+          {fav.name}
+        </button>
+      {/each}
+    </div>
+  {/if}
 
   {#if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>

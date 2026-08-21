@@ -5,14 +5,17 @@
   import type { BizkaibusStop } from "../lib/bizkaibus/types";
   import type { ArrivalEstimate } from "../lib/shared/types";
   import { debounce } from "../lib/shared/debounce";
+  import { favorites } from "../lib/shared/favorites.svelte";
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
+  import BottomSheet from "./shared/BottomSheet.svelte";
   import LinesBrowser from "./bizkaibus/LinesBrowser.svelte";
-  import { RefreshCw, Route } from "@lucide/svelte";
+  import { RefreshCw, Route, Star } from "@lucide/svelte";
 
   let showLines = $state(false);
+  let bizkaibusFavorites = $derived(favorites.items.filter((f) => f.operator === "bizkaibus"));
 
   let query = $state("");
   let suggestions = $state<BizkaibusStop[]>([]);
@@ -36,6 +39,13 @@
       return;
     }
     runSearch(q);
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter" && suggestions.length > 0) {
+      e.preventDefault();
+      selectStop(suggestions[0]);
+    }
   }
 
   async function selectStop(stop: BizkaibusStop) {
@@ -68,6 +78,7 @@
       class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
       bind:value={query}
       oninput={onQueryInput}
+      onkeydown={onKeydown}
     />
     {#if searching}
       <p class="absolute mt-1 flex w-full items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2 text-sm text-text-muted">
@@ -83,18 +94,31 @@
     {/if}
   </div>
 
+  {#if !selected && bizkaibusFavorites.length > 0}
+    <div class="flex flex-wrap gap-1.5">
+      {#each bizkaibusFavorites as fav (fav.code)}
+        <button
+          type="button"
+          class="flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover"
+          onclick={() => selectStop({ code: fav.code, name: fav.name, municipality: fav.meta ?? "", lat: 0, lon: 0 })}
+        >
+          <Star size={11} class="text-amber-400" fill="currentColor" />
+          {fav.name}
+        </button>
+      {/each}
+    </div>
+  {/if}
+
   <button
     type="button"
     class="flex items-center gap-1.5 text-xs font-medium text-text-faint hover:text-text"
-    onclick={() => (showLines = !showLines)}
+    onclick={() => (showLines = true)}
   >
     <Route size={13} />
-    {showLines ? "Ver parada" : "Ver líneas"}
+    Ver líneas
   </button>
 
-  {#if showLines}
-    <LinesBrowser />
-  {:else if loading}
+  {#if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
   {:else if error}
     <p class="py-2 text-sm text-red-400">Error: {error}</p>
@@ -131,3 +155,9 @@
     </div>
   {/if}
 </section>
+
+{#if showLines}
+  <BottomSheet title="Líneas Bizkaibus" onClose={() => (showLines = false)}>
+    <LinesBrowser />
+  </BottomSheet>
+{/if}

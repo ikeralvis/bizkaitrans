@@ -15,11 +15,14 @@
   <ul
     class="absolute z-10 mt-1 max-h-80 w-full overflow-y-auto rounded-2xl border border-border bg-surface p-1 shadow-2xl shadow-black/50"
   >
-    {#each items as entry (getKey(entry))}
+    {#each items as entry, i (getKey(entry))}
       <li>
         <button
           type="button"
           class="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-surface-hover"
+          class:bg-surface-hover={i === 0}
+          class:ring-1={i === 0}
+          class:ring-border={i === 0}
           onclick={() => onSelect(entry)}
         >
           {@render item(entry)}

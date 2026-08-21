@@ -93,6 +93,15 @@ async function main() {
   today.setHours(0, 0, 0, 0);
   const window = Array.from({ length: DAYS_AHEAD }, (_, i) => addDays(today, i));
 
+  // trips.txt has occasionally referenced service_ids that calendar.txt/
+  // calendar_dates.txt never actually activate in the current window (seen
+  // live: trips already switched to the next season's ids while
+  // calendar_dates still expected the outgoing season for a few more days).
+  // Resolving purely from the calendar can then yield zero usable trips even
+  // though the feed has real schedule data - so we only trust a service_id
+  // once we've confirmed trips.txt actually has trips for it.
+  const serviceIdsWithTrips = new Set(tripsRows.map((t) => t.service_id));
+
   // serviceId -> list of dateStr this service is active on, within our window
   const datesByServiceId = new Map();
   const dateMeta = [];
@@ -100,6 +109,7 @@ async function main() {
     const dateStr = ymd(date);
     dateMeta.push({ date: dateStr, weekday: WEEKDAY_LABELS_ES[date.getDay()] });
     for (const serviceId of activeServiceIds(date, calendarRows, exceptionsByDate)) {
+      if (!serviceIdsWithTrips.has(serviceId)) continue;
       let arr = datesByServiceId.get(serviceId);
       if (!arr) {
         arr = [];
@@ -109,6 +119,23 @@ async function main() {
     }
   }
   console.log(`Resolved schedule window ${dateMeta[0].date} .. ${dateMeta.at(-1).date}`);
+
+  // Fallback: the calendar+trips cross-check above found nothing at all for
+  // the whole window (a fully desynced feed, not just one odd date) - rather
+  // than ship an empty app, fall back to "whatever trips.txt actually has",
+  // labelled as an approximate/representative schedule instead of per-date.
+  const usingApproximateSchedule = datesByServiceId.size === 0;
+  if (usingApproximateSchedule) {
+    console.warn(
+      "WARNING: no service_id in calendar/calendar_dates matches any trip in trips.txt for this window. " +
+        "Falling back to an approximate schedule built from all available trips (source feed looks desynced)."
+    );
+    dateMeta.length = 0;
+    dateMeta.push({ date: "APPROX", weekday: "Horario aprox." });
+    for (const serviceId of serviceIdsWithTrips) {
+      datesByServiceId.set(serviceId, ["APPROX"]);
+    }
+  }
 
   const stopsById = new Map(
     stopsRows.map((r) => [r.stop_id, { code: r.stop_code, name: r.stop_name, lat: Number(r.stop_lat), lon: Number(r.stop_lon) }])

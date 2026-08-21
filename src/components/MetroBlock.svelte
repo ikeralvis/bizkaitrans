@@ -1,15 +1,16 @@
 <script lang="ts">
   import { getStation } from "../lib/metro/api";
-  import { toArrivalEstimates } from "../lib/metro/normalize";
+  import { toPlatformGroups } from "../lib/metro/normalize";
   import type { MetroStation } from "../lib/metro/types";
-  import type { ArrivalEstimate } from "../lib/shared/types";
   import stations from "../data/metro/stations.json";
+  import { favorites } from "../lib/shared/favorites.svelte";
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
+  import BottomSheet from "./shared/BottomSheet.svelte";
   import MetroFares from "./metro/MetroFares.svelte";
-  import { RefreshCw, Accessibility, ArrowUpFromLine, CreditCard } from "@lucide/svelte";
+  import { RefreshCw, Accessibility, ArrowUpFromLine, CreditCard, Star } from "@lucide/svelte";
 
   let showFares = $state(false);
 
@@ -21,11 +22,12 @@
   }
 
   const allStations = stations as StationEntry[];
+  let metroFavorites = $derived(favorites.items.filter((f) => f.operator === "metro"));
 
   let query = $state("");
   let selected = $state<StationEntry | null>(null);
   let station = $state<MetroStation | null>(null);
-  let arrivals = $state<ArrivalEstimate[]>([]);
+  let platformGroups = $state<ReturnType<typeof toPlatformGroups>>([]);
   let loading = $state(false);
   let error = $state<string | null>(null);
 
@@ -42,11 +44,18 @@
     error = null;
     try {
       station = await getStation(entry.code);
-      arrivals = toArrivalEstimates(station).sort((a, b) => a.minutesLeft - b.minutesLeft);
+      platformGroups = toPlatformGroups(station);
     } catch (e) {
       error = e instanceof Error ? e.message : "Error desconocido";
     } finally {
       loading = false;
+    }
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter" && filtered.length > 0) {
+      e.preventDefault();
+      selectStation(filtered[0]);
     }
   }
 
@@ -63,6 +72,7 @@
       class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-metro/50"
       bind:value={query}
       oninput={() => (selected = null)}
+      onkeydown={onKeydown}
     />
     <SearchDropdown items={filtered} getKey={(s) => s.id} onSelect={selectStation}>
       {#snippet item(s: StationEntry)}
@@ -72,18 +82,31 @@
     </SearchDropdown>
   </div>
 
+  {#if !selected && metroFavorites.length > 0}
+    <div class="flex flex-wrap gap-1.5">
+      {#each metroFavorites as fav (fav.code)}
+        <button
+          type="button"
+          class="flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover"
+          onclick={() => selectStation({ id: 0, name: fav.name, code: fav.code, lines: (fav.meta ?? "").split(" / ") })}
+        >
+          <Star size={11} class="text-amber-400" fill="currentColor" />
+          {fav.name}
+        </button>
+      {/each}
+    </div>
+  {/if}
+
   <button
     type="button"
     class="flex items-center gap-1.5 text-xs font-medium text-text-faint hover:text-text"
-    onclick={() => (showFares = !showFares)}
+    onclick={() => (showFares = true)}
   >
     <CreditCard size={13} />
-    {showFares ? "Ver parada" : "Ver tarifas"}
+    Ver tarifas
   </button>
 
-  {#if showFares}
-    <MetroFares />
-  {:else if loading}
+  {#if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
   {:else if error}
     <p class="py-2 text-sm text-red-400">Error: {error}</p>
@@ -108,7 +131,14 @@
           </div>
         </div>
 
-        <ArrivalsList {arrivals} emptyMessage="Sin trenes próximos." />
+        {#each platformGroups as group, i (i)}
+          {#if group.length > 0}
+            <p class="mt-3 mb-1 text-xs font-medium text-text-faint uppercase">
+              Andén {i + 1} · dirección {group[0].headsign}
+            </p>
+            <ArrivalsList arrivals={group} emptyMessage="Sin trenes próximos." />
+          {/if}
+        {/each}
 
         {#if station.exits.length > 0}
           <div class="mt-3 border-t border-border pt-3">
@@ -130,3 +160,9 @@
     </div>
   {/if}
 </section>
+
+{#if showFares}
+  <BottomSheet title="Tarifas Metro Bilbao" onClose={() => (showFares = false)}>
+    <MetroFares />
+  </BottomSheet>
+{/if}
