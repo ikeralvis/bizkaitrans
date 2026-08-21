@@ -5,7 +5,7 @@
   import { favorites } from "../lib/shared/favorites.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
-  import { RefreshCw, ChevronLeft, Star, Search, X } from "@lucide/svelte";
+  import { RefreshCw, ChevronLeft, ChevronDown, Star, Search, X } from "@lucide/svelte";
 
   let routes = $state<BilbobusRouteSummary[]>([]);
   let routesLoading = $state(true);
@@ -18,6 +18,8 @@
   let direction = $state<"0" | "1">("0");
   let dateIndex = $state(0);
   let expandedStopCode = $state<string | null>(null);
+  let viewMode = $state<"next" | "schedule">("next");
+  let scheduleStopCode = $state<string | null>(null);
 
   let vehicles = $state<BilbobusVehicle[]>([]);
   let vehiclesLoading = $state(false);
@@ -69,6 +71,8 @@
       const exactIdx = routeDetail.dates.findIndex((d) => d.date === today);
       dateIndex = exactIdx >= 0 ? exactIdx : Math.max(0, routeDetail.dates.findIndex((d) => d.date > today));
     }
+    viewMode = "next";
+    scheduleStopCode = routeDetail.directions[direction]?.[0]?.code ?? null;
     routeLoading = false;
     refreshVehicles();
   }
@@ -165,7 +169,7 @@
                 <Star size={14} fill={bilbobusFavoriteIds.has(route.id) ? "currentColor" : "none"} />
               </button>
             </div>
-            <span class="line-clamp-2 text-xs leading-snug text-text-muted">{route.longName}</span>
+            <span class="line-clamp-2 text-xs leading-snug font-semibold text-text">{route.longName}</span>
           </div>
         {/each}
       </div>
@@ -206,11 +210,37 @@
             class:text-black={direction === dir}
             class:bg-surface-hover={direction !== dir}
             class:text-text-muted={direction !== dir}
-            onclick={() => (direction = dir as "0" | "1")}
+            onclick={() => {
+              direction = dir as '0' | '1';
+              scheduleStopCode = routeDetail?.directions[direction]?.[0]?.code ?? null;
+            }}
           >
             {dir === "0" ? "Ida" : "Vuelta"}
           </button>
         {/each}
+      </div>
+
+      <div class="mb-3 flex gap-1 rounded-2xl bg-surface p-1 ring-1 ring-border">
+        <button
+          type="button"
+          class="flex-1 rounded-xl py-2 text-xs font-semibold transition-colors"
+          class:bg-bilbobus={viewMode === "next"}
+          class:text-black={viewMode === "next"}
+          class:text-text-faint={viewMode !== "next"}
+          onclick={() => (viewMode = "next")}
+        >
+          Próximos
+        </button>
+        <button
+          type="button"
+          class="flex-1 rounded-xl py-2 text-xs font-semibold transition-colors"
+          class:bg-bilbobus={viewMode === "schedule"}
+          class:text-black={viewMode === "schedule"}
+          class:text-text-faint={viewMode !== "schedule"}
+          onclick={() => (viewMode = "schedule")}
+        >
+          Horario completo
+        </button>
       </div>
 
       {#if routeDetail.dates.length === 1 && routeDetail.dates[0].date === "APPROX"}
@@ -259,45 +289,81 @@
         </button>
       </div>
 
-      <ul class="space-y-2.5">
-        {#each routeDetail.directions[direction] ?? [] as stop, i (stop.code)}
-          {@const dateStr = routeDetail.dates[dateIndex].date}
-          {@const times = stop.times[dateStr] ?? []}
-          {@const next = upcomingTimes(times, dateStr, 1)[0]}
-          <li class="overflow-hidden rounded-2xl border border-border bg-surface">
-            <button
-              type="button"
-              class="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-hover"
-              onclick={() => toggleStop(stop.code)}
+      {#if viewMode === "next"}
+        <ul class="space-y-2.5">
+          {#each routeDetail.directions[direction] ?? [] as stop, i (stop.code)}
+            {@const dateStr = routeDetail.dates[dateIndex].date}
+            {@const times = stop.times[dateStr] ?? []}
+            {@const next = upcomingTimes(times, dateStr, 1)[0]}
+            <li class="overflow-hidden rounded-2xl border border-border bg-surface">
+              <button
+                type="button"
+                class="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-hover"
+                onclick={() => toggleStop(stop.code)}
+              >
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bilbobus/10 text-xs font-semibold text-bilbobus">
+                  {i + 1}
+                </span>
+                <span class="min-w-0 flex-1 truncate text-base font-medium">{stop.name}</span>
+                <span class="shrink-0 text-xl font-bold tabular-nums">
+                  {#if times.length === 0}
+                    <span class="text-sm font-normal text-text-faint">sin servicio</span>
+                  {:else}
+                    {next?.slice(0, 5)}
+                  {/if}
+                </span>
+              </button>
+              {#if expandedStopCode === stop.code}
+                <div class="flex flex-wrap gap-1.5 border-t border-border px-4 py-3">
+                  {#if times.length === 0}
+                    <p class="text-xs text-text-faint">Sin horarios este día.</p>
+                  {:else}
+                    {#each times as t (t)}
+                      <span class="rounded-lg bg-bilbobus/10 px-2 py-1 text-sm font-medium tabular-nums text-bilbobus">
+                        {t.slice(0, 5)}
+                      </span>
+                    {/each}
+                  {/if}
+                </div>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        {@const dateStr = routeDetail.dates[dateIndex].date}
+        {@const stopList = routeDetail.directions[direction] ?? []}
+        {@const activeStop = stopList.find((s) => s.code === scheduleStopCode) ?? stopList[0]}
+        <div class="space-y-3">
+          <div class="relative">
+            <select
+              bind:value={scheduleStopCode}
+              class="w-full appearance-none rounded-2xl border border-border bg-surface px-4 py-3 pr-10 text-sm font-medium text-text focus:outline-none focus:ring-2 focus:ring-bilbobus/50"
             >
-              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bilbobus/10 text-xs font-semibold text-bilbobus">
-                {i + 1}
-              </span>
-              <span class="min-w-0 flex-1 truncate text-base font-medium">{stop.name}</span>
-              <span class="shrink-0 text-xl font-bold tabular-nums">
-                {#if times.length === 0}
-                  <span class="text-sm font-normal text-text-faint">sin servicio</span>
-                {:else}
-                  {next?.slice(0, 5)}
-                {/if}
-              </span>
-            </button>
-            {#if expandedStopCode === stop.code}
-              <div class="flex flex-wrap gap-1.5 border-t border-border px-4 py-3">
-                {#if times.length === 0}
-                  <p class="text-xs text-text-faint">Sin horarios este día.</p>
-                {:else}
-                  {#each times as t (t)}
-                    <span class="rounded-lg bg-bilbobus/10 px-2 py-1 text-sm font-medium tabular-nums text-bilbobus">
-                      {t.slice(0, 5)}
-                    </span>
-                  {/each}
-                {/if}
+              {#each stopList as stop (stop.code)}
+                <option value={stop.code}>{stop.name}</option>
+              {/each}
+            </select>
+            <ChevronDown size={16} class="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-text-faint" />
+          </div>
+
+          {#if activeStop}
+            {@const allTimes = activeStop.times[dateStr] ?? []}
+            {#if allTimes.length === 0}
+              <p class="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-text-faint">
+                Sin horarios este día para esta parada.
+              </p>
+            {:else}
+              <div class="grid grid-cols-4 gap-2">
+                {#each allTimes as t (t)}
+                  <span class="rounded-xl bg-bilbobus/10 py-2 text-center text-sm font-semibold tabular-nums text-bilbobus">
+                    {t.slice(0, 5)}
+                  </span>
+                {/each}
               </div>
             {/if}
-          </li>
-        {/each}
-      </ul>
+          {/if}
+        </div>
+      {/if}
     </div>
   {/if}
 </section>

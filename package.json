@@ -14,7 +14,8 @@
     "data:bizkaibus-lines": "node scripts/fetch-bizkaibus-lines.mjs",
     "data:bilbobus": "node scripts/fetch-bilbobus-gtfs.mjs",
     "data:renfe": "node scripts/fetch-renfe-stations.mjs",
-    "data:all": "npm run data:bizkaibus && npm run data:bizkaibus-lines && npm run data:bilbobus && npm run data:renfe"
+    "data:metro-lines": "node scripts/fetch-metro-line-order.mjs",
+    "data:all": "npm run data:bizkaibus && npm run data:bizkaibus-lines && npm run data:bilbobus && npm run data:renfe && npm run data:metro-lines"
   },
   "dependencies": {
     "@astrojs/svelte": "^9.0.1",

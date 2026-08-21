@@ -1,0 +1,222 @@
+{
+  "L1": [
+    {
+      "code": "PLE",
+      "name": "Plentzia"
+    },
+    {
+      "code": "URD",
+      "name": "Urduliz"
+    },
+    {
+      "code": "SOP",
+      "name": "Sopela"
+    },
+    {
+      "code": "LAR",
+      "name": "Larrabasterra"
+    },
+    {
+      "code": "BER",
+      "name": "Berango"
+    },
+    {
+      "code": "IBB",
+      "name": "Ibarbengoa"
+    },
+    {
+      "code": "BID",
+      "name": "Bidezabal"
+    },
+    {
+      "code": "ALG",
+      "name": "Algorta"
+    },
+    {
+      "code": "AIB",
+      "name": "Aiboa"
+    },
+    {
+      "code": "NEG",
+      "name": "Neguri"
+    },
+    {
+      "code": "GOB",
+      "name": "Gobela"
+    },
+    {
+      "code": "ARE",
+      "name": "Areeta"
+    },
+    {
+      "code": "LAM",
+      "name": "Lamiako"
+    },
+    {
+      "code": "LEI",
+      "name": "Leioa"
+    },
+    {
+      "code": "AST",
+      "name": "Astrabudua"
+    },
+    {
+      "code": "ERA",
+      "name": "Erandio"
+    },
+    {
+      "code": "LUT",
+      "name": "Lutxana"
+    },
+    {
+      "code": "SIN",
+      "name": "San Ignazio"
+    },
+    {
+      "code": "SAR",
+      "name": "Sarriko"
+    },
+    {
+      "code": "DEU",
+      "name": "Deustu"
+    },
+    {
+      "code": "SAM",
+      "name": "San Mamés"
+    },
+    {
+      "code": "IND",
+      "name": "Indautxu"
+    },
+    {
+      "code": "MOY",
+      "name": "Eliptikoa"
+    },
+    {
+      "code": "ABA",
+      "name": "Abando"
+    },
+    {
+      "code": "CAV",
+      "name": "Zazpikaleak/Casco Viejo"
+    },
+    {
+      "code": "SAN",
+      "name": "Santutxu"
+    },
+    {
+      "code": "BAS",
+      "name": "Basarrate"
+    },
+    {
+      "code": "BOL",
+      "name": "Bolueta"
+    },
+    {
+      "code": "ETX",
+      "name": "Etxebarri"
+    }
+  ],
+  "L2": [
+    {
+      "code": "KAB",
+      "name": "Kabiezes"
+    },
+    {
+      "code": "STZ",
+      "name": "Santurtzi"
+    },
+    {
+      "code": "PEN",
+      "name": "Peñota"
+    },
+    {
+      "code": "POR",
+      "name": "Portugalete"
+    },
+    {
+      "code": "ABT",
+      "name": "Abatxolo"
+    },
+    {
+      "code": "SES",
+      "name": "Sestao"
+    },
+    {
+      "code": "URB",
+      "name": "Urbinaga"
+    },
+    {
+      "code": "BAG",
+      "name": "Bagatza"
+    },
+    {
+      "code": "BAR",
+      "name": "Barakaldo"
+    },
+    {
+      "code": "ANS",
+      "name": "Ansio"
+    },
+    {
+      "code": "GUR",
+      "name": "Gurutzeta/Cruces"
+    },
+    {
+      "code": "SIN",
+      "name": "San Ignazio"
+    },
+    {
+      "code": "SAR",
+      "name": "Sarriko"
+    },
+    {
+      "code": "DEU",
+      "name": "Deustu"
+    },
+    {
+      "code": "SAM",
+      "name": "San Mamés"
+    },
+    {
+      "code": "IND",
+      "name": "Indautxu"
+    },
+    {
+      "code": "MOY",
+      "name": "Eliptikoa"
+    },
+    {
+      "code": "ABA",
+      "name": "Abando"
+    },
+    {
+      "code": "CAV",
+      "name": "Zazpikaleak/Casco Viejo"
+    },
+    {
+      "code": "SAN",
+      "name": "Santutxu"
+    },
+    {
+      "code": "BAS",
+      "name": "Basarrate"
+    },
+    {
+      "code": "BOL",
+      "name": "Bolueta"
+    },
+    {
+      "code": "ETX",
+      "name": "Etxebarri"
+    },
+    {
+      "code": "ARZ",
+      "name": "Ariz"
+    },
+    {
+      "code": "BSR",
+      "name": "Basauri"
+    }
+  ]
+}

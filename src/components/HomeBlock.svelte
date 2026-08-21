@@ -59,7 +59,7 @@
     <div class="flex flex-col items-center gap-2 rounded-2xl border border-border bg-surface p-6 text-center">
       <Star size={24} class="text-text-faint" />
       <p class="text-sm text-text-muted">
-        Aún no tienes paradas favoritas. Busca una parada en cualquier pestaña de Transportes y toca la estrella
+        Aún no tienes paradas favoritas. Busca una parada en Metro, Bilbobus, Bizkaibus o Renfe y toca la estrella
         para guardarla aquí.
       </p>
     </div>

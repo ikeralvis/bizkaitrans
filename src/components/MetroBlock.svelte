@@ -3,6 +3,7 @@
   import { toPlatformGroups } from "../lib/metro/normalize";
   import type { MetroStation, MetroTrip } from "../lib/metro/types";
   import stations from "../data/metro/stations.json";
+  import lineOrder from "../data/metro/line-order.json";
   import { favorites } from "../lib/shared/favorites.svelte";
   import ArrivalsList from "./shared/ArrivalsList.svelte";
   import SearchDropdown from "./shared/SearchDropdown.svelte";
@@ -36,8 +37,14 @@
     lines: string[];
   }
 
+  interface LineStation {
+    code: string;
+    name: string;
+  }
+
   const allStations = stations as StationEntry[];
-  const allLines = [...new Set(allStations.flatMap((s) => s.lines))].sort();
+  const orderedLines = lineOrder as Record<string, LineStation[]>;
+  const allLines = Object.keys(orderedLines);
   let metroFavorites = $derived(favorites.items.filter((f) => f.operator === "metro"));
 
   // --- Origin/destination real-time trip search ---
@@ -104,17 +111,17 @@
     }
   }
 
-  // --- Line browser + single-station detail ---
+  // --- Line browser (real physical order) + single-station detail ---
   let activeLine = $state<string>(allLines[0] ?? "L1");
-  let selected = $state<StationEntry | null>(null);
+  let selected = $state<{ code: string; name: string } | null>(null);
   let station = $state<MetroStation | null>(null);
   let platformGroups = $state<ReturnType<typeof toPlatformGroups>>([]);
   let loading = $state(false);
   let error = $state<string | null>(null);
 
-  let lineStations = $derived(allStations.filter((s) => s.lines.includes(activeLine)));
+  let lineStations = $derived(orderedLines[activeLine] ?? []);
 
-  async function selectStation(entry: StationEntry) {
+  async function selectStation(entry: { code: string; name: string }) {
     selected = entry;
     loading = true;
     error = null;
@@ -140,14 +147,24 @@
 
 <div class="flex items-center justify-between">
   <h2 class="text-lg font-bold">Metro Bilbao</h2>
-  <button
-    type="button"
-    class="relative rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
-    onclick={() => (showAlerts = true)}
-    aria-label="Ver avisos"
-  >
-    <Bell size={19} />
-  </button>
+  <div class="flex items-center gap-1">
+    <button
+      type="button"
+      class="rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+      onclick={() => (showFares = true)}
+      aria-label="Ver tarifas"
+    >
+      <CreditCard size={19} />
+    </button>
+    <button
+      type="button"
+      class="relative rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+      onclick={() => (showAlerts = true)}
+      aria-label="Ver avisos"
+    >
+      <Bell size={19} />
+    </button>
+  </div>
 </div>
 
 <section class="mt-3 space-y-2">
@@ -221,7 +238,7 @@
         <button
           type="button"
           class="flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-text-muted hover:bg-surface-hover"
-          onclick={() => selectStation({ id: 0, name: fav.name, code: fav.code, lines: (fav.meta ?? "").split(" / ") })}
+          onclick={() => selectStation({ code: fav.code, name: fav.name })}
         >
           <Star size={11} class="text-amber-400" fill="currentColor" />
           {fav.name}
@@ -229,15 +246,6 @@
       {/each}
     </div>
   {/if}
-
-  <button
-    type="button"
-    class="flex items-center gap-1.5 text-xs font-medium text-text-faint hover:text-text"
-    onclick={() => (showFares = true)}
-  >
-    <CreditCard size={13} />
-    Ver tarifas
-  </button>
 </section>
 
 {#if tripLoading}
@@ -323,7 +331,7 @@
     {/each}
   </div>
   <ul class="space-y-2">
-    {#each lineStations as s (s.id)}
+    {#each lineStations as s (s.code)}
       <li>
         <button
           type="button"

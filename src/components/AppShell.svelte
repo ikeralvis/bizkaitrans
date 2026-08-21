@@ -1,50 +1,59 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import { Home, Bus, Route, TriangleAlert } from "@lucide/svelte";
-  import TransportTabs from "./TransportTabs.svelte";
-  import HomeBlock from "./HomeBlock.svelte";
-  import RoutesPlaceholder from "./RoutesPlaceholder.svelte";
-  import MetroAlerts from "./metro/MetroAlerts.svelte";
+  import { TrainFront, Bus, BusFront, Train } from "@lucide/svelte";
+  import { OPERATOR_COLOR } from "../lib/shared/operators";
+  import type { Operator } from "../lib/shared/types";
 
-  type SectionId = "home" | "transport" | "routes" | "alerts";
+  const NAV_LABEL: Record<Operator, string> = {
+    metro: "Metro",
+    bilbobus: "Bilbobus",
+    bizkaibus: "Bizkaibus",
+    renfe: "Renfe",
+  };
 
-  const SECTIONS: { id: SectionId; label: string; icon: Component }[] = [
-    { id: "home", label: "Inicio", icon: Home },
-    { id: "transport", label: "Transportes", icon: Bus },
-    { id: "routes", label: "Rutas", icon: Route },
-    { id: "alerts", label: "Alertas", icon: TriangleAlert },
+  const TABS: { id: Operator; icon: Component }[] = [
+    { id: "metro", icon: TrainFront },
+    { id: "bilbobus", icon: Bus },
+    { id: "bizkaibus", icon: BusFront },
+    { id: "renfe", icon: Train },
   ];
 
-  let active = $state<SectionId>("home");
-  let visited = $state<Partial<Record<SectionId, boolean>>>({ home: true });
+  const loaders: Record<Operator, () => Promise<{ default: Component }>> = {
+    metro: () => import("./MetroBlock.svelte"),
+    bilbobus: () => import("./BilbobusBlock.svelte"),
+    bizkaibus: () => import("./BizkaibusBlock.svelte"),
+    renfe: () => import("./RenfeBlock.svelte"),
+  };
 
-  function activate(id: SectionId) {
+  let active = $state<Operator>("metro");
+  let loaded = $state<Partial<Record<Operator, Component>>>({});
+
+  async function activate(id: Operator) {
     active = id;
-    visited[id] = true;
+    if (!loaded[id]) {
+      const mod = await loaders[id]();
+      loaded[id] = mod.default;
+    }
   }
+
+  activate("metro");
 </script>
 
-<div class="mx-auto max-w-md pb-20">
-  <div class="px-4 pt-2">
-    {#if active === "home"}
-      <HomeBlock />
-    {/if}
-    {#if visited["transport"]}
-      <div class:hidden={active !== "transport"}>
-        <TransportTabs />
-      </div>
-    {/if}
-    {#if visited["routes"]}
-      <div class:hidden={active !== "routes"}>
-        <RoutesPlaceholder />
-      </div>
-    {/if}
-    {#if visited["alerts"]}
-      <div class:hidden={active !== "alerts"}>
-        <MetroAlerts />
-      </div>
-    {/if}
-  </div>
+<div class="mx-auto max-w-md px-4 pt-2 pb-24">
+  {#each TABS as tab (tab.id)}
+    <div class:hidden={active !== tab.id}>
+      {#if loaded[tab.id]}
+        {@const Block = loaded[tab.id]}
+        <Block />
+      {:else if active === tab.id}
+        <div class="animate-pulse space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-border">
+          <div class="h-10 rounded-xl bg-surface-hover"></div>
+          <div class="h-4 w-2/3 rounded bg-surface-hover"></div>
+          <div class="h-4 w-1/2 rounded bg-surface-hover"></div>
+        </div>
+      {/if}
+    </div>
+  {/each}
 </div>
 
 <nav
@@ -52,16 +61,16 @@
   style="padding-bottom: env(safe-area-inset-bottom)"
 >
   <div class="mx-auto flex max-w-md">
-    {#each SECTIONS as section (section.id)}
-      {@const Icon = section.icon}
+    {#each TABS as tab (tab.id)}
+      {@const Icon = tab.icon}
       <button
         type="button"
         class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-text-faint transition-all active:scale-95"
-        class:text-text={active === section.id}
-        onclick={() => activate(section.id)}
+        style:color={active === tab.id ? OPERATOR_COLOR[tab.id] : undefined}
+        onclick={() => activate(tab.id)}
       >
-        <Icon size={20} strokeWidth={active === section.id ? 2.5 : 2} />
-        {section.label}
+        <Icon size={20} strokeWidth={active === tab.id ? 2.5 : 2} />
+        {NAV_LABEL[tab.id]}
       </button>
     {/each}
   </div>

@@ -147,17 +147,16 @@
       </div>
 
       <p class="text-xs text-text-faint">Toca una parada para ver sus próximos autobuses.</p>
-      <ul class="space-y-2">
+      <ul class="space-y-2.5">
         {#each detail.directions[direction] ?? [] as stop, i (stop.code + i)}
           <li>
             <button
               type="button"
-              class="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 text-left transition-colors hover:bg-surface-hover active:scale-[0.99]"
+              class="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-5 py-5 text-left transition-colors hover:bg-surface-hover active:scale-[0.99]"
               onclick={() => openStop(stop)}
             >
-              <span class="w-6 shrink-0 text-right text-xs text-text-faint">{i + 1}</span>
-              <span class="min-w-0 flex-1 truncate text-sm font-medium">{stop.name}</span>
-              <ChevronRight size={16} class="shrink-0 text-text-faint" />
+              <span class="min-w-0 flex-1 truncate text-base font-medium">{stop.name}</span>
+              <ChevronRight size={18} class="shrink-0 text-text-faint" />
             </button>
           </li>
         {/each}
