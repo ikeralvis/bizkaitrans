@@ -2,11 +2,14 @@
   import { getRouteList, getRouteDetail } from "../lib/bilbobus/routes";
   import { getVehiclePositions, filterByRoute } from "../lib/bilbobus/realtime";
   import type { BilbobusRouteSummary, BilbobusRouteDetail, BilbobusVehicle } from "../lib/bilbobus/types";
+  import { favorites } from "../lib/shared/favorites.svelte";
   import Spinner from "./shared/Spinner.svelte";
-  import { RefreshCw, ChevronDown } from "@lucide/svelte";
+  import FavoriteButton from "./shared/FavoriteButton.svelte";
+  import { RefreshCw, ChevronLeft, Star, Search } from "@lucide/svelte";
 
   let routes = $state<BilbobusRouteSummary[]>([]);
   let routesLoading = $state(true);
+  let routeQuery = $state("");
 
   let selectedRouteId = $state("");
   let routeDetail = $state<BilbobusRouteDetail | null>(null);
@@ -24,6 +27,25 @@
     routes = list;
     routesLoading = false;
   });
+
+  let bilbobusFavoriteIds = $derived(
+    new Set(favorites.items.filter((f) => f.operator === "bilbobus").map((f) => f.code))
+  );
+
+  let visibleRoutes = $derived(
+    routeQuery.trim().length === 0
+      ? routes
+      : routes.filter(
+          (r) =>
+            r.id.toLowerCase().includes(routeQuery.trim().toLowerCase()) ||
+            r.longName.toLowerCase().includes(routeQuery.trim().toLowerCase())
+        )
+  );
+
+  function backToRoutes() {
+    selectedRouteId = "";
+    routeDetail = null;
+  }
 
   async function selectRoute(routeId: string) {
     selectedRouteId = routeId;
@@ -90,28 +112,81 @@
 </script>
 
 <section class="space-y-3">
-  {#if routesLoading}
-    <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando líneas...</p>
-  {:else}
+  {#if !selectedRouteId}
     <div class="relative">
-      <select
-        bind:value={selectedRouteId}
-        onchange={() => selectRoute(selectedRouteId)}
-        class="w-full appearance-none rounded-2xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text focus:outline-none focus:ring-2 focus:ring-bilbobus/50"
-      >
-        <option value="" disabled>Elige una línea...</option>
-        {#each routes as route (route.id)}
-          <option value={route.id}>{route.id} · {route.longName}</option>
-        {/each}
-      </select>
-      <ChevronDown size={16} class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-text-faint" />
+      <Search size={16} class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-faint" />
+      <input
+        type="text"
+        placeholder="Buscar línea (ej. 01, Plaza Circular...)"
+        class="w-full rounded-2xl border border-border bg-surface py-3 pr-4 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bilbobus/50"
+        bind:value={routeQuery}
+      />
     </div>
+
+    {#if routesLoading}
+      <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando líneas...</p>
+    {:else}
+      <div class="grid grid-cols-2 gap-2.5">
+        {#each visibleRoutes as route (route.id)}
+          <div
+            role="button"
+            tabindex="0"
+            class="group relative flex flex-col gap-2 rounded-2xl border border-border bg-surface p-3.5 text-left transition-colors hover:bg-surface-hover active:scale-[0.98]"
+            onclick={() => selectRoute(route.id)}
+            onkeydown={(e) => e.key === "Enter" && selectRoute(route.id)}
+          >
+            <div class="flex items-start justify-between gap-1">
+              <span
+                class="flex h-9 min-w-9 items-center justify-center rounded-xl px-2 text-sm font-bold text-white"
+                style:background={route.color ? `#${route.color}` : "var(--color-bilbobus)"}
+              >
+                {route.id}
+              </span>
+              <button
+                type="button"
+                class="rounded-full p-1 text-text-faint hover:bg-surface-hover"
+                class:text-amber-400={bilbobusFavoriteIds.has(route.id)}
+                onclick={(e) => {
+                  e.stopPropagation();
+                  favorites.toggle({ operator: "bilbobus", code: route.id, name: `${route.id} · ${route.longName}` });
+                }}
+                aria-label="Favorito"
+              >
+                <Star size={14} fill={bilbobusFavoriteIds.has(route.id) ? "currentColor" : "none"} />
+              </button>
+            </div>
+            <span class="line-clamp-2 text-xs leading-snug text-text-muted">{route.longName}</span>
+          </div>
+        {/each}
+      </div>
+      {#if visibleRoutes.length === 0}
+        <p class="py-6 text-center text-sm text-text-faint">Sin líneas que coincidan con "{routeQuery}".</p>
+      {/if}
+    {/if}
+  {:else}
+    <button type="button" class="flex items-center gap-1 text-sm text-text-muted hover:text-text" onclick={backToRoutes}>
+      <ChevronLeft size={16} /> Volver a líneas
+    </button>
   {/if}
 
   {#if routeLoading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando recorrido...</p>
   {:else if routeDetail}
     <div class="rounded-2xl border border-border bg-surface p-4">
+      <div class="mb-3 flex items-center gap-2">
+        <span
+          class="flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-bold text-white"
+          style:background={routes.find((r) => r.id === selectedRouteId)?.color
+            ? `#${routes.find((r) => r.id === selectedRouteId)?.color}`
+            : "var(--color-bilbobus)"}
+        >
+          {selectedRouteId}
+        </span>
+        <span class="text-sm font-medium">{routeDetail.longName}</span>
+        <FavoriteButton
+          stop={{ operator: "bilbobus", code: selectedRouteId, name: `${selectedRouteId} · ${routeDetail.longName}` }}
+        />
+      </div>
       <div class="mb-2 flex flex-wrap gap-1">
         {#each Object.keys(routeDetail.directions) as dir (dir)}
           <button
@@ -157,12 +232,12 @@
         {:else if vehiclesError}
           <span class="text-red-400">Sin datos en vivo: {vehiclesError}</span>
         {:else if vehicles.length > 0}
-          <span class="flex items-center gap-1.5 text-bizkaibus">
-            <span class="h-1.5 w-1.5 rounded-full bg-bizkaibus"></span>
-            {vehicles.length} autobús(es) circulando ahora
+          <span class="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-1 font-semibold text-emerald-400">
+            <span class="h-1.5 w-1.5 animate-live-pulse rounded-full bg-emerald-400"></span>
+            {vehicles.length} en tiempo real ahora
           </span>
         {:else}
-          <span class="text-text-faint">Sin autobuses circulando ahora mismo.</span>
+          <span class="rounded-full bg-surface-hover px-2 py-1 font-medium text-text-faint">Horario estimado (sin GPS activo)</span>
         {/if}
         <button
           type="button"
@@ -174,38 +249,47 @@
         </button>
       </div>
 
-      <ol class="divide-y divide-border border-t border-border">
-        {#each routeDetail.directions[direction] ?? [] as stop (stop.code)}
+      <ol class="relative">
+        {#each routeDetail.directions[direction] ?? [] as stop, i (stop.code)}
           {@const dateStr = routeDetail.dates[dateIndex].date}
           {@const times = stop.times[dateStr] ?? []}
-          <li>
-            <button
-              type="button"
-              class="flex w-full items-center justify-between gap-2 py-2.5 text-left"
-              onclick={() => toggleStop(stop.code)}
-            >
-              <span class="truncate text-sm">{stop.name}</span>
-              <span class="shrink-0 text-xs tabular-nums text-text-muted">
-                {#if times.length === 0}
-                  sin servicio
-                {:else}
-                  {upcomingTimes(times, dateStr).map((t) => t.slice(0, 5)).join(" · ")}
-                {/if}
-              </span>
-            </button>
-            {#if expandedStopCode === stop.code}
-              <div class="flex flex-wrap gap-1.5 pb-3">
-                {#if times.length === 0}
-                  <p class="text-xs text-text-faint">Sin horarios este día.</p>
-                {:else}
-                  {#each times as t (t)}
-                    <span class="rounded-md bg-bilbobus/10 px-1.5 py-0.5 text-xs tabular-nums text-bilbobus">
-                      {t.slice(0, 5)}
-                    </span>
-                  {/each}
-                {/if}
-              </div>
-            {/if}
+          {@const isLast = i === (routeDetail.directions[direction]?.length ?? 0) - 1}
+          <li class="relative flex gap-3">
+            <div class="relative flex flex-col items-center">
+              <span class="z-10 mt-3 h-2.5 w-2.5 shrink-0 rounded-full bg-bilbobus ring-4 ring-surface"></span>
+              {#if !isLast}
+                <span class="w-px flex-1 bg-border"></span>
+              {/if}
+            </div>
+            <div class="min-w-0 flex-1 pb-3">
+              <button
+                type="button"
+                class="flex w-full items-center justify-between gap-2 pt-1.5 text-left"
+                onclick={() => toggleStop(stop.code)}
+              >
+                <span class="truncate text-sm">{stop.name}</span>
+                <span class="shrink-0 text-xs tabular-nums text-text-muted">
+                  {#if times.length === 0}
+                    sin servicio
+                  {:else}
+                    {upcomingTimes(times, dateStr).map((t) => t.slice(0, 5)).join(" · ")}
+                  {/if}
+                </span>
+              </button>
+              {#if expandedStopCode === stop.code}
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
+                  {#if times.length === 0}
+                    <p class="text-xs text-text-faint">Sin horarios este día.</p>
+                  {:else}
+                    {#each times as t (t)}
+                      <span class="rounded-md bg-bilbobus/10 px-1.5 py-0.5 text-xs tabular-nums text-bilbobus">
+                        {t.slice(0, 5)}
+                      </span>
+                    {/each}
+                  {/if}
+                </div>
+              {/if}
+            </div>
           </li>
         {/each}
       </ol>

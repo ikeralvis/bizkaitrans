@@ -4,10 +4,10 @@
   import { parsePasoParadaXml, toArrivalEstimates } from "../../lib/bizkaibus/normalize";
   import type { BizkaibusLineSummary, BizkaibusLineDetail } from "../../lib/bizkaibus/types";
   import type { ArrivalEstimate } from "../../lib/shared/types";
+  import { favorites } from "../../lib/shared/favorites.svelte";
   import ArrivalsList from "../shared/ArrivalsList.svelte";
-  import SearchDropdown from "../shared/SearchDropdown.svelte";
   import Spinner from "../shared/Spinner.svelte";
-  import { ChevronLeft } from "@lucide/svelte";
+  import { ChevronLeft, Search, Star } from "@lucide/svelte";
 
   let lines = $state<BizkaibusLineSummary[]>([]);
   let query = $state("");
@@ -24,32 +24,26 @@
     lines = list;
   });
 
-  let filtered = $derived(
+  let bizkaibusLineFavoriteIds = $derived(
+    new Set(favorites.items.filter((f) => f.operator === "bizkaibus" && f.meta === "line").map((f) => f.code))
+  );
+
+  let visibleLines = $derived(
     query.trim().length === 0
-      ? []
-      : lines
-          .filter(
-            (l) =>
-              l.code.toLowerCase().includes(query.trim().toLowerCase()) ||
-              l.name.toLowerCase().includes(query.trim().toLowerCase())
-          )
-          .slice(0, 8)
+      ? lines
+      : lines.filter(
+          (l) =>
+            l.code.toLowerCase().includes(query.trim().toLowerCase()) ||
+            l.name.toLowerCase().includes(query.trim().toLowerCase())
+        )
   );
 
   async function selectLine(line: BizkaibusLineSummary) {
     selected = line;
-    query = "";
     loading = true;
     detail = await getLineDetail(line.code);
     direction = Object.keys(detail.directions)[0] ?? "I";
     loading = false;
-  }
-
-  function onKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter" && filtered.length > 0) {
-      e.preventDefault();
-      selectLine(filtered[0]);
-    }
   }
 
   function back() {
@@ -79,22 +73,52 @@
 <section class="space-y-3">
   {#if !selected}
     <div class="relative">
+      <Search size={16} class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-faint" />
       <input
         type="text"
         placeholder="Buscar línea (ej. A3524, Bermeo...)"
-        class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
+        class="w-full rounded-2xl border border-border bg-surface py-3 pr-4 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
         bind:value={query}
-        onkeydown={onKeydown}
       />
-      <SearchDropdown items={filtered} getKey={(l) => l.code} onSelect={selectLine}>
-        {#snippet item(l: BizkaibusLineSummary)}
-          <span class="shrink-0 rounded-full bg-bizkaibus/10 px-2 py-0.5 text-xs font-semibold text-bizkaibus">
-            {l.code}
-          </span>
-          <span class="truncate text-xs text-text-muted">{l.name}</span>
-        {/snippet}
-      </SearchDropdown>
     </div>
+
+    {#if lines.length === 0}
+      <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando líneas...</p>
+    {:else}
+      <div class="grid grid-cols-2 gap-2.5">
+        {#each visibleLines as line (line.code)}
+          <div
+            role="button"
+            tabindex="0"
+            class="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-3.5 text-left transition-colors hover:bg-surface-hover active:scale-[0.98]"
+            onclick={() => selectLine(line)}
+            onkeydown={(e) => e.key === "Enter" && selectLine(line)}
+          >
+            <div class="flex items-start justify-between gap-1">
+              <span class="flex h-9 min-w-9 items-center justify-center rounded-xl bg-bizkaibus px-2 text-sm font-bold text-black">
+                {line.code}
+              </span>
+              <button
+                type="button"
+                class="rounded-full p-1 text-text-faint hover:bg-surface-hover"
+                class:text-amber-400={bizkaibusLineFavoriteIds.has(line.code)}
+                onclick={(e) => {
+                  e.stopPropagation();
+                  favorites.toggle({ operator: "bizkaibus", code: line.code, name: `${line.code} · ${line.name}`, meta: "line" });
+                }}
+                aria-label="Favorito"
+              >
+                <Star size={14} fill={bizkaibusLineFavoriteIds.has(line.code) ? "currentColor" : "none"} />
+              </button>
+            </div>
+            <span class="line-clamp-2 text-xs leading-snug text-text-muted">{line.name}</span>
+          </div>
+        {/each}
+      </div>
+      {#if visibleLines.length === 0}
+        <p class="py-6 text-center text-sm text-text-faint">Sin líneas que coincidan con "{query}".</p>
+      {/if}
+    {/if}
   {:else}
     <button type="button" class="flex items-center gap-1 text-sm text-text-muted hover:text-text" onclick={back}>
       <ChevronLeft size={16} /> Volver a líneas

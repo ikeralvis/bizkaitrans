@@ -10,9 +10,11 @@
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import BottomSheet from "./shared/BottomSheet.svelte";
   import MetroFares from "./metro/MetroFares.svelte";
-  import { RefreshCw, Accessibility, ArrowUpFromLine, CreditCard, Star } from "@lucide/svelte";
+  import MetroAlerts from "./metro/MetroAlerts.svelte";
+  import { RefreshCw, Accessibility, ArrowUpFromLine, CreditCard, Star, Bell, X } from "@lucide/svelte";
 
   let showFares = $state(false);
+  let showAlerts = $state(false);
 
   interface StationEntry {
     id: number;
@@ -64,16 +66,41 @@
   }
 </script>
 
+<div class="flex items-center justify-between">
+  <h2 class="text-lg font-bold">Metro Bilbao</h2>
+  <button
+    type="button"
+    class="relative rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+    onclick={() => (showAlerts = true)}
+    aria-label="Ver avisos"
+  >
+    <Bell size={19} />
+  </button>
+</div>
+
 <section class="space-y-3">
   <div class="relative">
     <input
       type="text"
       placeholder="Buscar estación (ej. Abando, San Mamés...)"
-      class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-metro/50"
+      class="w-full rounded-2xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-metro/50"
       bind:value={query}
       oninput={() => (selected = null)}
       onkeydown={onKeydown}
     />
+    {#if query}
+      <button
+        type="button"
+        class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-text-faint hover:bg-surface-hover hover:text-text"
+        onclick={() => {
+          query = "";
+          selected = null;
+        }}
+        aria-label="Limpiar búsqueda"
+      >
+        <X size={15} />
+      </button>
+    {/if}
     <SearchDropdown items={filtered} getKey={(s) => s.id} onSelect={selectStation}>
       {#snippet item(s: StationEntry)}
         <span class="truncate">{s.name}</span>
@@ -164,5 +191,11 @@
 {#if showFares}
   <BottomSheet title="Tarifas Metro Bilbao" onClose={() => (showFares = false)}>
     <MetroFares />
+  </BottomSheet>
+{/if}
+
+{#if showAlerts}
+  <BottomSheet title="Avisos e incidencias" onClose={() => (showAlerts = false)}>
+    <MetroAlerts />
   </BottomSheet>
 {/if}

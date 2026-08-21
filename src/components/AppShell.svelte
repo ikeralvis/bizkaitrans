@@ -48,7 +48,7 @@
 </div>
 
 <nav
-  class="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 backdrop-blur-xl"
+  class="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/70 backdrop-blur-lg"
   style="padding-bottom: env(safe-area-inset-bottom)"
 >
   <div class="mx-auto flex max-w-md">
@@ -56,11 +56,11 @@
       {@const Icon = section.icon}
       <button
         type="button"
-        class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-text-faint transition-colors"
+        class="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium text-text-faint transition-all active:scale-95"
         class:text-text={active === section.id}
         onclick={() => activate(section.id)}
       >
-        <Icon size={20} />
+        <Icon size={20} strokeWidth={active === section.id ? 2.5 : 2} />
         {section.label}
       </button>
     {/each}

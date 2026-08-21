@@ -1,7 +1,7 @@
 import type { Operator } from "./types";
 
 export interface FavoriteStop {
-  operator: Extract<Operator, "metro" | "bizkaibus" | "renfe">;
+  operator: Operator;
   code: string;
   name: string;
   meta?: string;
