@@ -2,21 +2,20 @@
   import { getLineList, getLineDetail } from "../../lib/bizkaibus/lines";
   import { getStopArrivalsRaw } from "../../lib/bizkaibus/api";
   import { parsePasoParadaXml, toArrivalEstimates } from "../../lib/bizkaibus/normalize";
-  import type { BizkaibusLineSummary, BizkaibusLineDetail } from "../../lib/bizkaibus/types";
+  import type { BizkaibusLineSummary, BizkaibusLineDetail, BizkaibusLineStop } from "../../lib/bizkaibus/types";
   import type { ArrivalEstimate } from "../../lib/shared/types";
   import { favorites } from "../../lib/shared/favorites.svelte";
-  import ArrivalsList from "../shared/ArrivalsList.svelte";
   import Spinner from "../shared/Spinner.svelte";
-  import { ChevronLeft, Search, Star } from "@lucide/svelte";
+  import { ChevronLeft, ChevronRight, Search, Star, X, RefreshCw } from "@lucide/svelte";
 
   let lines = $state<BizkaibusLineSummary[]>([]);
   let query = $state("");
-  let selected = $state<BizkaibusLineSummary | null>(null);
+  let selectedLine = $state<BizkaibusLineSummary | null>(null);
   let detail = $state<BizkaibusLineDetail | null>(null);
   let loading = $state(false);
   let direction = $state<string>("I");
 
-  let expandedStopCode = $state<string | null>(null);
+  let selectedStop = $state<BizkaibusLineStop | null>(null);
   let stopArrivals = $state<ArrivalEstimate[]>([]);
   let stopLoading = $state(false);
 
@@ -39,27 +38,27 @@
   );
 
   async function selectLine(line: BizkaibusLineSummary) {
-    selected = line;
+    selectedLine = line;
     loading = true;
     detail = await getLineDetail(line.code);
     direction = Object.keys(detail.directions)[0] ?? "I";
     loading = false;
   }
 
-  function back() {
-    selected = null;
+  function backToLines() {
+    selectedLine = null;
     detail = null;
   }
 
-  async function toggleStop(code: string) {
-    if (expandedStopCode === code) {
-      expandedStopCode = null;
-      return;
-    }
-    expandedStopCode = code;
+  function backToStops() {
+    selectedStop = null;
+  }
+
+  async function openStop(stop: BizkaibusLineStop) {
+    selectedStop = stop;
     stopLoading = true;
     try {
-      const raw = await getStopArrivalsRaw(code);
+      const raw = await getStopArrivalsRaw(stop.code);
       const parsed = parsePasoParadaXml(raw.Resultado);
       stopArrivals = toArrivalEstimates(parsed).sort((a, b) => a.minutesLeft - b.minutesLeft);
     } catch {
@@ -68,18 +67,124 @@
       stopLoading = false;
     }
   }
+
+  function refreshStop() {
+    if (selectedStop) openStop(selectedStop);
+  }
 </script>
 
-<section class="space-y-3">
-  {#if !selected}
+{#if selectedStop}
+  <!-- Full-screen stop detail -->
+  <section class="space-y-4">
+    <button type="button" class="flex items-center gap-1 text-sm text-text-muted hover:text-text" onclick={backToStops}>
+      <ChevronLeft size={16} /> Volver a la lista de paradas
+    </button>
+
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-xl font-bold">{selectedStop.name}</h3>
+      <button
+        type="button"
+        class="shrink-0 rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+        onclick={refreshStop}
+        aria-label="Actualizar"
+      >
+        <RefreshCw size={18} />
+      </button>
+    </div>
+
+    {#if stopLoading}
+      <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tiempos...</p>
+    {:else if stopArrivals.length === 0}
+      <p class="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-text-faint">
+        Sin autobuses próximos en esta parada.
+      </p>
+    {:else}
+      <ul class="space-y-2.5">
+        {#each stopArrivals as bus, i (bus.lineId + bus.headsign + bus.minutesLeft + i)}
+          <li class="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4">
+            <span class="flex h-11 min-w-11 items-center justify-center rounded-xl bg-bizkaibus px-2 text-base font-bold text-black">
+              {bus.lineId}
+            </span>
+            <span class="min-w-0 flex-1 truncate text-base text-text-muted">{bus.headsign}</span>
+            <span class="shrink-0 text-2xl font-bold tabular-nums">
+              {bus.minutesLeft <= 0 ? "Ahora" : `${bus.minutesLeft}′`}
+            </span>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  </section>
+{:else if selectedLine}
+  <!-- Full-width line detail: stop list -->
+  <section class="space-y-3">
+    <button type="button" class="flex items-center gap-1 text-sm text-text-muted hover:text-text" onclick={backToLines}>
+      <ChevronLeft size={16} /> Volver a líneas
+    </button>
+
+    {#if loading}
+      <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando línea...</p>
+    {:else if detail}
+      <div class="flex items-center gap-2">
+        <span class="flex h-10 min-w-10 items-center justify-center rounded-xl bg-bizkaibus px-2 text-base font-bold text-black">
+          {detail.code}
+        </span>
+        <span class="text-base font-semibold">{detail.name}</span>
+      </div>
+
+      <div class="flex gap-1 rounded-2xl bg-surface p-1 ring-1 ring-border">
+        {#each Object.keys(detail.directions) as dir (dir)}
+          <button
+            type="button"
+            class="flex-1 rounded-xl py-2 text-sm font-medium transition-colors"
+            class:bg-bizkaibus={direction === dir}
+            class:text-black={direction === dir}
+            class:text-text-faint={direction !== dir}
+            onclick={() => (direction = dir)}
+          >
+            {dir === "I" ? "Ida" : "Vuelta"}
+          </button>
+        {/each}
+      </div>
+
+      <p class="text-xs text-text-faint">Toca una parada para ver sus próximos autobuses.</p>
+      <ul class="space-y-2">
+        {#each detail.directions[direction] ?? [] as stop, i (stop.code + i)}
+          <li>
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 text-left transition-colors hover:bg-surface-hover active:scale-[0.99]"
+              onclick={() => openStop(stop)}
+            >
+              <span class="w-6 shrink-0 text-right text-xs text-text-faint">{i + 1}</span>
+              <span class="min-w-0 flex-1 truncate text-sm font-medium">{stop.name}</span>
+              <ChevronRight size={16} class="shrink-0 text-text-faint" />
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  </section>
+{:else}
+  <!-- Line grid -->
+  <section class="space-y-3">
     <div class="relative">
       <Search size={16} class="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-faint" />
       <input
         type="text"
         placeholder="Buscar línea (ej. A3524, Bermeo...)"
-        class="w-full rounded-2xl border border-border bg-surface py-3 pr-4 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
+        class="w-full rounded-2xl border border-border bg-surface py-3 pr-10 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
         bind:value={query}
       />
+      {#if query}
+        <button
+          type="button"
+          class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-text-faint hover:bg-surface-hover hover:text-text"
+          onclick={() => (query = "")}
+          aria-label="Limpiar búsqueda"
+        >
+          <X size={15} />
+        </button>
+      {/if}
     </div>
 
     {#if lines.length === 0}
@@ -119,61 +224,5 @@
         <p class="py-6 text-center text-sm text-text-faint">Sin líneas que coincidan con "{query}".</p>
       {/if}
     {/if}
-  {:else}
-    <button type="button" class="flex items-center gap-1 text-sm text-text-muted hover:text-text" onclick={back}>
-      <ChevronLeft size={16} /> Volver a líneas
-    </button>
-
-    {#if loading}
-      <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando línea...</p>
-    {:else if detail}
-      <div class="rounded-2xl border border-border bg-surface p-4">
-        <p class="mb-2 flex items-center gap-2">
-          <span class="rounded-full bg-bizkaibus px-2 py-0.5 text-xs font-bold text-black">{detail.code}</span>
-          <span class="text-sm font-medium">{detail.name}</span>
-        </p>
-
-        <div class="mb-3 flex flex-wrap gap-1">
-          {#each Object.keys(detail.directions) as dir (dir)}
-            <button
-              type="button"
-              class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
-              class:bg-bizkaibus={direction === dir}
-              class:text-black={direction === dir}
-              class:bg-surface-hover={direction !== dir}
-              class:text-text-muted={direction !== dir}
-              onclick={() => (direction = dir)}
-            >
-              {dir === "I" ? "Ida" : "Vuelta"}
-            </button>
-          {/each}
-        </div>
-
-        <p class="mb-1 text-xs text-text-faint">Toca una parada para ver sus próximos autobuses.</p>
-        <ol class="divide-y divide-border border-t border-border">
-          {#each detail.directions[direction] ?? [] as stop, i (stop.code + i)}
-            <li>
-              <button
-                type="button"
-                class="flex w-full items-center gap-3 py-2 text-left text-sm"
-                onclick={() => toggleStop(stop.code)}
-              >
-                <span class="w-5 shrink-0 text-right text-xs text-text-faint">{i + 1}</span>
-                <span class="truncate">{stop.name}</span>
-              </button>
-              {#if expandedStopCode === stop.code}
-                <div class="pb-2 pl-8">
-                  {#if stopLoading}
-                    <p class="flex items-center gap-2 text-xs text-text-muted"><Spinner size={13} /> Cargando...</p>
-                  {:else}
-                    <ArrivalsList arrivals={stopArrivals} emptyMessage="Sin autobuses próximos en esta parada." />
-                  {/if}
-                </div>
-              {/if}
-            </li>
-          {/each}
-        </ol>
-      </div>
-    {/if}
-  {/if}
-</section>
+  </section>
+{/if}

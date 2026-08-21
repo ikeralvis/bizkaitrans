@@ -1,6 +1,6 @@
 ---
 import AppShell from "../components/AppShell.svelte";
-import ThemeToggle from "../components/shared/ThemeToggle.svelte";
+import HeaderActions from "../components/shared/HeaderActions.svelte";
 import "../styles/global.css";
 ---
 
@@ -23,7 +23,7 @@ import "../styles/global.css";
 		<header class="flex items-center justify-between px-4 py-4">
 			<span class="w-9"></span>
 			<h1 class="text-lg font-bold tracking-tight">Bizkaitrans</h1>
-			<ThemeToggle client:load />
+			<HeaderActions client:load />
 		</header>
 		<AppShell client:load />
 	</body>

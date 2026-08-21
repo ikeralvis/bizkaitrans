@@ -5,7 +5,7 @@
   import { favorites } from "../lib/shared/favorites.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
-  import { RefreshCw, ChevronLeft, Star, Search } from "@lucide/svelte";
+  import { RefreshCw, ChevronLeft, Star, Search, X } from "@lucide/svelte";
 
   let routes = $state<BilbobusRouteSummary[]>([]);
   let routesLoading = $state(true);
@@ -118,9 +118,19 @@
       <input
         type="text"
         placeholder="Buscar línea (ej. 01, Plaza Circular...)"
-        class="w-full rounded-2xl border border-border bg-surface py-3 pr-4 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bilbobus/50"
+        class="w-full rounded-2xl border border-border bg-surface py-3 pr-10 pl-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bilbobus/50"
         bind:value={routeQuery}
       />
+      {#if routeQuery}
+        <button
+          type="button"
+          class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-text-faint hover:bg-surface-hover hover:text-text"
+          onclick={() => (routeQuery = "")}
+          aria-label="Limpiar búsqueda"
+        >
+          <X size={15} />
+        </button>
+      {/if}
     </div>
 
     {#if routesLoading}
@@ -249,50 +259,45 @@
         </button>
       </div>
 
-      <ol class="relative">
+      <ul class="space-y-2.5">
         {#each routeDetail.directions[direction] ?? [] as stop, i (stop.code)}
           {@const dateStr = routeDetail.dates[dateIndex].date}
           {@const times = stop.times[dateStr] ?? []}
-          {@const isLast = i === (routeDetail.directions[direction]?.length ?? 0) - 1}
-          <li class="relative flex gap-3">
-            <div class="relative flex flex-col items-center">
-              <span class="z-10 mt-3 h-2.5 w-2.5 shrink-0 rounded-full bg-bilbobus ring-4 ring-surface"></span>
-              {#if !isLast}
-                <span class="w-px flex-1 bg-border"></span>
-              {/if}
-            </div>
-            <div class="min-w-0 flex-1 pb-3">
-              <button
-                type="button"
-                class="flex w-full items-center justify-between gap-2 pt-1.5 text-left"
-                onclick={() => toggleStop(stop.code)}
-              >
-                <span class="truncate text-sm">{stop.name}</span>
-                <span class="shrink-0 text-xs tabular-nums text-text-muted">
-                  {#if times.length === 0}
-                    sin servicio
-                  {:else}
-                    {upcomingTimes(times, dateStr).map((t) => t.slice(0, 5)).join(" · ")}
-                  {/if}
-                </span>
-              </button>
-              {#if expandedStopCode === stop.code}
-                <div class="mt-1.5 flex flex-wrap gap-1.5">
-                  {#if times.length === 0}
-                    <p class="text-xs text-text-faint">Sin horarios este día.</p>
-                  {:else}
-                    {#each times as t (t)}
-                      <span class="rounded-md bg-bilbobus/10 px-1.5 py-0.5 text-xs tabular-nums text-bilbobus">
-                        {t.slice(0, 5)}
-                      </span>
-                    {/each}
-                  {/if}
-                </div>
-              {/if}
-            </div>
+          {@const next = upcomingTimes(times, dateStr, 1)[0]}
+          <li class="overflow-hidden rounded-2xl border border-border bg-surface">
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-hover"
+              onclick={() => toggleStop(stop.code)}
+            >
+              <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bilbobus/10 text-xs font-semibold text-bilbobus">
+                {i + 1}
+              </span>
+              <span class="min-w-0 flex-1 truncate text-base font-medium">{stop.name}</span>
+              <span class="shrink-0 text-xl font-bold tabular-nums">
+                {#if times.length === 0}
+                  <span class="text-sm font-normal text-text-faint">sin servicio</span>
+                {:else}
+                  {next?.slice(0, 5)}
+                {/if}
+              </span>
+            </button>
+            {#if expandedStopCode === stop.code}
+              <div class="flex flex-wrap gap-1.5 border-t border-border px-4 py-3">
+                {#if times.length === 0}
+                  <p class="text-xs text-text-faint">Sin horarios este día.</p>
+                {:else}
+                  {#each times as t (t)}
+                    <span class="rounded-lg bg-bilbobus/10 px-2 py-1 text-sm font-medium tabular-nums text-bilbobus">
+                      {t.slice(0, 5)}
+                    </span>
+                  {/each}
+                {/if}
+              </div>
+            {/if}
           </li>
         {/each}
-      </ol>
+      </ul>
     </div>
   {/if}
 </section>

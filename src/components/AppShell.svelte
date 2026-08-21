@@ -3,7 +3,7 @@
   import { Home, Bus, Route, TriangleAlert } from "@lucide/svelte";
   import TransportTabs from "./TransportTabs.svelte";
   import HomeBlock from "./HomeBlock.svelte";
-  import RoutePlanner from "./metro/RoutePlanner.svelte";
+  import RoutesPlaceholder from "./RoutesPlaceholder.svelte";
   import MetroAlerts from "./metro/MetroAlerts.svelte";
 
   type SectionId = "home" | "transport" | "routes" | "alerts";
@@ -36,7 +36,7 @@
     {/if}
     {#if visited["routes"]}
       <div class:hidden={active !== "routes"}>
-        <RoutePlanner />
+        <RoutesPlaceholder />
       </div>
     {/if}
     {#if visited["alerts"]}

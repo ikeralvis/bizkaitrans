@@ -11,7 +11,7 @@
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import LinesBrowser from "./bizkaibus/LinesBrowser.svelte";
-  import { RefreshCw, Star } from "@lucide/svelte";
+  import { RefreshCw, Star, X } from "@lucide/svelte";
 
   let viewMode = $state<"stops" | "lines">("stops");
   let bizkaibusFavorites = $derived(favorites.items.filter((f) => f.operator === "bizkaibus"));
@@ -100,11 +100,25 @@
       <input
         type="text"
         placeholder="Buscar parada (ej. Zabalburu, Getxo...)"
-        class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
+        class="w-full rounded-2xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-bizkaibus/50"
         bind:value={query}
         oninput={onQueryInput}
         onkeydown={onKeydown}
       />
+      {#if query && !searching}
+        <button
+          type="button"
+          class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-text-faint hover:bg-surface-hover hover:text-text"
+          onclick={() => {
+            query = "";
+            selected = null;
+            suggestions = [];
+          }}
+          aria-label="Limpiar búsqueda"
+        >
+          <X size={15} />
+        </button>
+      {/if}
       {#if searching}
         <p class="absolute mt-1 flex w-full items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2 text-sm text-text-muted">
           <Spinner /> Buscando...

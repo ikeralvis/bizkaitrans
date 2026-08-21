@@ -8,7 +8,7 @@
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import { favorites } from "../lib/shared/favorites.svelte";
-  import { RefreshCw, Star } from "@lucide/svelte";
+  import { RefreshCw, Star, X } from "@lucide/svelte";
 
   interface RenfeStation {
     code: string;
@@ -68,11 +68,24 @@
     <input
       type="text"
       placeholder="Buscar estación (ej. Abando, Deusto...)"
-      class="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-renfe/50"
+      class="w-full rounded-2xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:ring-2 focus:ring-renfe/50"
       bind:value={query}
       oninput={() => (selected = null)}
       onkeydown={onKeydown}
     />
+    {#if query}
+      <button
+        type="button"
+        class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-text-faint hover:bg-surface-hover hover:text-text"
+        onclick={() => {
+          query = "";
+          selected = null;
+        }}
+        aria-label="Limpiar búsqueda"
+      >
+        <X size={15} />
+      </button>
+    {/if}
     <SearchDropdown items={filtered} getKey={(s) => s.code} onSelect={selectStation}>
       {#snippet item(s: RenfeStation)}
         <span class="truncate">{s.name}</span>

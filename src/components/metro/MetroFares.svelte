@@ -3,12 +3,13 @@
   import type { MetroFareItem } from "../../lib/metro/types";
   import { stripHtml } from "../../lib/shared/stripHtml";
   import Spinner from "../shared/Spinner.svelte";
-  import { ChevronDown, CreditCard } from "@lucide/svelte";
+  import BottomSheet from "../shared/BottomSheet.svelte";
+  import { CreditCard } from "@lucide/svelte";
 
   let fares = $state<MetroFareItem[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
-  let expanded = $state<string | null>(null);
+  let detail = $state<MetroFareItem | null>(null);
 
   getFares()
     .then((res) => {
@@ -20,48 +21,37 @@
     .finally(() => {
       loading = false;
     });
-
-  function toggle(code: string) {
-    expanded = expanded === code ? null : code;
-  }
 </script>
 
-<section class="space-y-2">
+<section>
   {#if loading}
     <p class="flex items-center gap-2 py-2 text-sm text-text-muted"><Spinner /> Cargando tarifas...</p>
   {:else if error}
     <p class="py-2 text-sm text-red-400">Error: {error}</p>
   {:else}
-    <ul class="space-y-2">
+    <div class="grid grid-cols-2 gap-2.5">
       {#each fares as fare (fare.code)}
-        <li class="rounded-2xl border border-border bg-surface">
-          <button
-            type="button"
-            class="flex w-full items-center gap-2 p-3 text-left"
-            onclick={() => toggle(fare.code)}
-          >
-            <CreditCard size={16} class="shrink-0 text-metro" />
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-medium">{fare.name}</span>
-              {#if fare.subTitle}
-                <span class="block truncate text-xs text-text-faint">{stripHtml(fare.subTitle)}</span>
-              {/if}
-            </span>
-            <span
-              class="shrink-0 text-text-faint transition-transform"
-              class:rotate-180={expanded === fare.code}
-            >
-              <ChevronDown size={16} />
-            </span>
-          </button>
-          {#if expanded === fare.code}
-            <div class="space-y-1 border-t border-border px-3 py-2.5 text-xs whitespace-pre-line text-text-muted">
-              {#if fare.personal}<p>{stripHtml(fare.personal)}</p>{/if}
-              <p>{stripHtml(fare.terms)}</p>
-            </div>
+        <button
+          type="button"
+          class="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-3.5 text-left transition-colors hover:bg-surface-hover active:scale-[0.98]"
+          onclick={() => (detail = fare)}
+        >
+          <CreditCard size={18} class="text-metro" />
+          <span class="text-sm font-semibold">{fare.name}</span>
+          {#if fare.subTitle}
+            <span class="line-clamp-2 text-xs text-text-faint">{stripHtml(fare.subTitle)}</span>
           {/if}
-        </li>
+        </button>
       {/each}
-    </ul>
+    </div>
   {/if}
 </section>
+
+{#if detail}
+  <BottomSheet title={detail.name} onClose={() => (detail = null)}>
+    <div class="space-y-2 text-sm whitespace-pre-line text-text-muted">
+      {#if detail.personal}<p>{stripHtml(detail.personal)}</p>{/if}
+      <p>{stripHtml(detail.terms)}</p>
+    </div>
+  </BottomSheet>
+{/if}
