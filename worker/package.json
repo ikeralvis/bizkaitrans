@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "wrangler dev",
+    "build": "echo 'no build step - wrangler deploy bundles at deploy time'",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
