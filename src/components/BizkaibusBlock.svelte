@@ -11,7 +11,8 @@
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import LinesBrowser from "./bizkaibus/LinesBrowser.svelte";
-  import { RefreshCw, Star, X } from "@lucide/svelte";
+  import OperatorBanner from "./shared/OperatorBanner.svelte";
+  import { RefreshCw, Star, X, BusFront } from "@lucide/svelte";
 
   let viewMode = $state<"stops" | "lines">("stops");
   let bizkaibusFavorites = $derived(favorites.items.filter((f) => f.operator === "bizkaibus"));
@@ -68,6 +69,8 @@
     if (selected) selectStop(selected);
   }
 </script>
+
+<OperatorBanner color="var(--color-bizkaibus)" title="Bizkaibus" icon={BusFront} />
 
 <div class="mb-3 flex gap-1 rounded-2xl bg-surface p-1 ring-1 ring-border">
   <button

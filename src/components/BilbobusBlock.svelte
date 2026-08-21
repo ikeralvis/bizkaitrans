@@ -5,7 +5,8 @@
   import { favorites } from "../lib/shared/favorites.svelte";
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
-  import { RefreshCw, ChevronLeft, ChevronDown, Star, Search, X } from "@lucide/svelte";
+  import OperatorBanner from "./shared/OperatorBanner.svelte";
+  import { RefreshCw, ChevronLeft, ChevronDown, Star, Search, X, Bus } from "@lucide/svelte";
 
   let routes = $state<BilbobusRouteSummary[]>([]);
   let routesLoading = $state(true);
@@ -114,6 +115,8 @@
     expandedStopCode = expandedStopCode === code ? null : code;
   }
 </script>
+
+<OperatorBanner color="var(--color-bilbobus)" title="Bilbobus" icon={Bus} />
 
 <section class="space-y-3">
   {#if !selectedRouteId}

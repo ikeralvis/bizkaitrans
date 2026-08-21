@@ -1,0 +1,40 @@
+name: Refresh transit data
+
+# Runs the data:* pipeline scripts (GTFS/line/stop snapshots - NOT realtime,
+# see README/DEPLOY notes) on a schedule and commits any changes straight to
+# main. Cloudflare Pages watches this repo and redeploys automatically on
+# every push, so a successful commit here is what keeps schedules/lines
+# fresh in production without a manual redeploy.
+on:
+  schedule:
+    - cron: "17 4 * * *" # once a day, off-peak
+  workflow_dispatch: {} # manual "Run workflow" button
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run data:all
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data
+          if git diff --cached --quiet; then
+            echo "No data changes."
+          else
+            git commit -m "chore: refresh transit data snapshot"
+            git push
+          fi

@@ -63,5 +63,32 @@
       <p class="mb-1 font-medium text-text-muted">Bizkaitrans</p>
       <p>Metro Bilbao · Bilbobus · Bizkaibus · Renfe Cercanías, en una sola app. Los favoritos se guardan solo en este dispositivo.</p>
     </div>
+
+    <div>
+      <p class="mb-2 text-xs font-medium tracking-wide text-text-faint uppercase">Fuentes de datos</p>
+      <ul class="space-y-1.5 rounded-2xl border border-border bg-surface p-3.5 text-xs text-text-faint">
+        <li class="flex items-center gap-2">
+          <span class="h-2 w-2 shrink-0 rounded-full" style:background="var(--color-metro)"></span>
+          Metro Bilbao S.A. — api.metrobilbao.eus (horarios y avisos oficiales)
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="h-2 w-2 shrink-0 rounded-full" style:background="var(--color-bilbobus)"></span>
+          Bilbobus / Ayto. de Bilbao — datos abiertos GTFS y GTFS-RT de bilbao.eus
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="h-2 w-2 shrink-0 rounded-full" style:background="var(--color-bizkaibus)"></span>
+          Bizkaibus / Diputación Foral de Bizkaia — Open Data Euskadi
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="h-2 w-2 shrink-0 rounded-full" style:background="var(--color-renfe)"></span>
+          Renfe Cercanías / Adif — gtfsrt.renfe.com
+        </li>
+      </ul>
+      <p class="mt-2 text-[11px] leading-relaxed text-text-faint">
+        Bizkaitrans es un proyecto independiente y no oficial, sin afiliación con ninguno de los operadores
+        anteriores. Los datos mostrados son propiedad de cada operador y se muestran tal cual los publican sus
+        fuentes oficiales.
+      </p>
+    </div>
   </div>
 </BottomSheet>

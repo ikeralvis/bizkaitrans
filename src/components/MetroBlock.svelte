@@ -10,6 +10,7 @@
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import BottomSheet from "./shared/BottomSheet.svelte";
+  import OperatorBanner from "./shared/OperatorBanner.svelte";
   import MetroFares from "./metro/MetroFares.svelte";
   import MetroAlerts from "./metro/MetroAlerts.svelte";
   import {
@@ -145,12 +146,16 @@
   }
 </script>
 
-<div class="flex items-center justify-between">
-  <h2 class="text-lg font-bold">Metro Bilbao</h2>
-  <div class="flex items-center gap-1">
+<OperatorBanner
+  color="var(--color-metro)"
+  title="Metro Bilbao"
+  logo="https://www.metrobilbao.eus/img/mb-logo-white-text.png"
+  illustration="https://www.metrobilbao.eus/img/tren-vector.svg"
+>
+  {#snippet actions()}
     <button
       type="button"
-      class="rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+      class="rounded-full p-2 text-white/90 hover:bg-white/15"
       onclick={() => (showFares = true)}
       aria-label="Ver tarifas"
     >
@@ -158,16 +163,16 @@
     </button>
     <button
       type="button"
-      class="relative rounded-full p-2 text-text-faint hover:bg-surface-hover hover:text-text"
+      class="relative rounded-full p-2 text-white/90 hover:bg-white/15"
       onclick={() => (showAlerts = true)}
       aria-label="Ver avisos"
     >
       <Bell size={19} />
     </button>
-  </div>
-</div>
+  {/snippet}
+</OperatorBanner>
 
-<section class="mt-3 space-y-2">
+<section class="space-y-2">
   <div class="flex items-center gap-2">
     <div class="flex-1 space-y-2">
       <div class="relative">

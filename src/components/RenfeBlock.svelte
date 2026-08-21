@@ -8,7 +8,8 @@
   import Spinner from "./shared/Spinner.svelte";
   import FavoriteButton from "./shared/FavoriteButton.svelte";
   import { favorites } from "../lib/shared/favorites.svelte";
-  import { RefreshCw, Star, X } from "@lucide/svelte";
+  import OperatorBanner from "./shared/OperatorBanner.svelte";
+  import { RefreshCw, Star, X, Train } from "@lucide/svelte";
 
   interface RenfeStation {
     code: string;
@@ -62,6 +63,8 @@
     }
   }
 </script>
+
+<OperatorBanner color="var(--color-renfe)" title="Renfe Cercanías" icon={Train} />
 
 <section class="space-y-3">
   <div class="relative">
